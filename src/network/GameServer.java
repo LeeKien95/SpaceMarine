@@ -34,18 +34,17 @@ public class GameServer extends Thread {
 			}
 			
 			String message = new String(packet.getData());
-			System.out.println("Client > " + message);
-			if(message.equalsIgnoreCase("ping")) {		
-				sendData("pong".getBytes(), packet.getAddress(), packet.getPort());
-			}
-			System.out.println("Server > " + new String(packet.getData()));
+			System.out.println("Client ["+ packet.getAddress().getHostAddress() +": "+ packet.getPort()+"] > " + message);
+//			System.out.println("Server > Recived:" + new String(packet.getData()));
+			String respond = "Seen "+ message;
+			sendData(respond.getBytes()  , packet.getAddress(), packet.getPort());
 		}
 	}
 	
 	public void sendData(byte[] data, InetAddress ipAddress, int port) {
 		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, port);
 		try {
-			socket.send((packet));
+			this.socket.send((packet));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

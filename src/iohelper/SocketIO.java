@@ -35,7 +35,7 @@ public abstract class SocketIO {
 	}
 
 	public DatagramPacket getPacket() {
-		byte[] buf = new byte[1024];
+		byte[] buf = new byte[10000];
 		DatagramPacket packet = new DatagramPacket(buf, buf.length);
 		try {
 			serverSocket.receive(packet);

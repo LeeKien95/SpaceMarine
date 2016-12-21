@@ -75,7 +75,7 @@ public class Animation extends KeyAdapter{
 			isMoving = true;
 			lastKeyPressed = "right";
 		}
-		if(key.equals("j") == true) {
+		if(key.equals("p") == true) {
 			if(isShot == false) {
 				isShot = true;
 			}
@@ -109,7 +109,7 @@ public class Animation extends KeyAdapter{
 				isMoving = false;
 			}
 		}
-		if(key.equals("j")) {
+		if(key.equals("p")) {
 			isShot = false;
 		}
 

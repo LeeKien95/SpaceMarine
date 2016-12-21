@@ -32,10 +32,4 @@ public class ServerIO extends SocketIO {
 			e.printStackTrace();
 		}
 	}
-
-	public void sendDataToProperClient(byte[] data) {
-		for (Player p : game.getJetfighters) {
-			sendData(data, p.getIO().getHost(), p.getIO().getPort());
-		}
-	}
 }

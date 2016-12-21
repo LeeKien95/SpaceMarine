@@ -1,16 +1,21 @@
 package game;
 
+import java.io.Serializable;
+import java.net.InetAddress;
 import java.util.Random;
 
 import client.Client;
 
-public class Player extends Client {
+public class Player implements Serializable {
 	private String name;
 	private String type;
 	private int image;
 	private int x, y;
 	private String status;
 	private final int step = 5;
+	
+	private InetAddress ipAddress;
+	private int port;
 	
 	
 	public String getUsername() {
@@ -100,11 +105,64 @@ public class Player extends Client {
 	}
 	
 
-	public Player() {
-		super();
+//	public Player(String name) {
+//		super();
+//		Random rand = new Random();
+//		int number = rand.nextInt(1000) +1;
+//		this.setName(name);
+//		this.setImage(1);
+//		this.setStatus("idle");
+//		this.setType("1");
+//		this.setX(400);
+//		this.setY(500);
+//	}
+	
+	
+	
+	public InetAddress getIpAddress() {
+		return ipAddress;
+	}
+
+
+
+	public void setIpAddress(InetAddress ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+
+
+	public int getPort() {
+		return port;
+	}
+
+
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+
+
+	public String getName() {
+		return name;
+	}
+
+
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+
+	public Player(String name, InetAddress ipAddress, int port) {
+//		super(ipAddress, port);
+		this.ipAddress = ipAddress;
+		this.port = port;
 		Random rand = new Random();
 		int number = rand.nextInt(1000) +1;
-		this.setName("Jet fighter " + number);
+//		this.setName(name);
+		this.name = name;
 		this.setImage(1);
 		this.setStatus("idle");
 		this.setType("1");

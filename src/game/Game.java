@@ -2,8 +2,12 @@ package game;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -14,23 +18,32 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import client.Client;
+import iohelper.packet.SyncState;
 import server.Server;
 
 
 
-public class Game extends JFrame implements Runnable {
-	Image dbImage, backgroundImage, enemyBullet, jetBullet;
-	HashMap<String, Image> jetImg, enemyImg;
-	ArrayList<Projectile> projectiles, explosions;
-	ArrayList<Enemy> enemies;
-	ArrayList<Image> aestroids, enemyExplosion, jetExplosion;
+public class Game extends JFrame implements Runnable, Serializable {
+	public Image dbImage, backgroundImage, enemyBullet, jetBullet;
+	public HashMap<String, Image> jetImg, enemyImg;
+	public ArrayList<Projectile> projectiles, explosions;
+	public ArrayList<Enemy> enemies;
+	public ArrayList<Image> aestroids, enemyExplosion, jetExplosion;
 
-	Graphics dbg;
-	Animation myAnimation;
-	JPanel background;
-	ArrayList<Player> jetfighters;
-	Player jetfighter;
-	Client client ;
+	public Graphics dbg;
+	public Animation myAnimation;
+	public JPanel background;
+	public ArrayList<Player> jetfighters;
+	public Player jetfighter;
+	public Client client ;
+	public int kill_mark;
+	public int kill_count = 0;
+	public int level = 1;
+	public String message="";
+	public int count_frame = 0, respawn= 0;
+	public boolean isServer = false;
+	public boolean isClient = false;
+
 
 	public Game() {
 		super("Test");
@@ -38,7 +51,7 @@ public class Game extends JFrame implements Runnable {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 
-		String name = JOptionPane.showInputDialog(this, "Please enter a username");
+		// String name = JOptionPane.showInputDialog(this, "Please enter a username");
 
 		jetImg = new HashMap<String, Image>();
 		enemyImg = new HashMap<String, Image>();
@@ -50,10 +63,14 @@ public class Game extends JFrame implements Runnable {
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
 
-		jetfighter = new Player();   // NOTE server se khong khoi tao player, ma cho player gui thong tin den, roi moi dung tt nay de khoi tao
-		jetfighter.setName(name);
-		jetfighters.add(jetfighter);
+		// jetfighter = new Player();
+		// jetfighter.setName(name==null? name: "Starfighters " + new Random().nextInt(1000) +1);
+		// jetfighters.add(jetfighter);
 		myAnimation = new Animation();
+
+		// add multiplayer to jetfighters;
+
+		kill_mark = level*10*jetfighters.size();
 
 		//load images
 		try {
@@ -84,7 +101,10 @@ public class Game extends JFrame implements Runnable {
 		addKeyListener(myAnimation);
 		setVisible(true);
 	}
-
+    
+	public ArrayList<Player> getPlayers(){
+		return jetfighters;
+	}
 
 	public void paint(Graphics g) {
 		dbImage = createImage(getWidth(), getHeight());
@@ -99,11 +119,12 @@ public class Game extends JFrame implements Runnable {
 		paintEnemies(g);
 		paintProjectiles(g);
 		paintExplosion(g);
-//		g.setColor(Color.green);
-//
-//		if(myAnimation.lastKeyPressed!=null) {
-//			g.drawString(myAnimation.lastKeyPressed, 100, 100);
-//		}
+		g.setColor(Color.green);
+
+		if(myAnimation.lastKeyPressed!=null) {
+			g.drawString("Kill Count: " + kill_count, 50, 50);
+			g.drawString(this.message, 300, 300);
+		}
 	}
 
 	private void paintBackground(Graphics g) {
@@ -168,11 +189,7 @@ public class Game extends JFrame implements Runnable {
 				}
 				explosions.get(i).rolling();
 				if(explosions.get(i).image == 16) {
-					if(explosions.get(i).type.equals("jetExplosion")) {
-						if(jetfighters.get(0).getStatus().equals("dead")) {
-							over();
-						}
-					}
+
 					explosions.remove(i);
 				}
 			}
@@ -237,7 +254,7 @@ public class Game extends JFrame implements Runnable {
 
 	//control jetfighter
 	public void moveJet() {
-		if(myAnimation.lastKeyPressed != null ) {
+		if(myAnimation.lastKeyPressed != null) {
 			if(jetfighters.size() != 0) {
 				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());
 			}
@@ -282,10 +299,35 @@ public class Game extends JFrame implements Runnable {
 		}
 	}
 
+	public void levelup() {
+		this.message = "Yay! You're level UP! Press enter to suffer more! ;) ";
+	}
 
 	//check if enemy collision with player or player's bullet collision with enemies.
 	public void startGameplay() {
 		int i = 0;
+		int countAliveJet = 0;
+		for(i = 0; i < jetfighters.size(); i++) {
+			if(!jetfighters.get(i).getStatus().equals("dead")) countAliveJet++;
+		}
+		if(countAliveJet == 0) over();
+
+
+		for(i = 0; i < projectiles.size(); i++) {
+			for(int j = 0; j < projectiles.size(); j++) {
+				if(i!=j && collision(projectiles.get(i).x + 20, projectiles.get(i).y + 20, projectiles.get(j).x + 20, projectiles.get(j).y + 20)) {
+					if(!projectiles.get(i).type.equals(projectiles.get(j).type)) {
+						if(!projectiles.get(i).type.equals("aestroid")) {
+							projectiles.get(i).visible = false;
+						}
+						if(!projectiles.get(j).type.equals("aestroid")) {
+							projectiles.remove(j).visible = false;
+						}
+					}
+				}
+			}
+		}
+
 		//check player's bullet
 		for(int count = 0; count < jetfighters.size(); count ++) {
 			for(i = 0; i < enemies.size(); i++) {
@@ -301,9 +343,10 @@ public class Game extends JFrame implements Runnable {
 							explosion.image = 0;
 							explosion.type = "enemyExplosion";
 							explosions.add(explosion);
+							kill_count ++;
 						}
 					} else {//detect collision bw player and aestroid
-						if(collision(projectiles.get(j).x + 30, projectiles.get(j).y + 30, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
+						if(respawn == 0 && collision(projectiles.get(j).x + 30, projectiles.get(j).y + 30, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
 							Projectile explosion = new Projectile();
 							explosion.x = jetfighters.get(count).getX();
 							explosion.y = jetfighters.get(count).getY();
@@ -316,7 +359,7 @@ public class Game extends JFrame implements Runnable {
 				}
 
 				//detect collision bw enemies and player
-				if(collision(enemies.get(i).x + 20, enemies.get(i).y + 20, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
+				if(respawn == 0 && collision(enemies.get(i).x + 20, enemies.get(i).y + 20, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
 					enemies.get(i).status = "dead";
 					Projectile explosion = new Projectile();
 					explosion.x = jetfighters.get(count).getX();
@@ -329,54 +372,57 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 
+		if(respawn > 0) respawn--;
+		count_frame++;
+		moveJet();
+		moveEnemies();
+		moveProjectiles();
+
+		if(count_frame % 7 == 0) {
+			jetfighter.rolling();
+
+		}
+
+		if(count_frame % 5 == 0) {
+			armedJet();
+		}
+
+		if(count_frame % 120 == 0) {
+			spamEnemies();
+		}
+
+		if(count_frame % 200 == 0) {
+			spamAestroids();
+		}
+
+		if(count_frame % 250 == 0) {
+			enemyFire();
+		}
+		if(count_frame > 1000) count_frame = 1;
 
 	}
 
 	//dead
 	public void over() {
+		String message = "I'm the one with the force, the force is with me..";
+		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
+		if(option == 0) {
+			for(int i = 0; i < jetfighters.size(); i ++) {
+				jetfighters.get(i).setStatus("alive");
+			}
+			respawn = 120;
+			level = 1;
+		} else {
+			System.exit(0);
+		}
 
-		System.exit(0);
 	}
 
 	@Override
 	public void run() {
-		int count_frame = 0;
 		while(true) {
-//			if(jetfighters.size() == 0) break;
 			startGameplay();
 			repaint();
-			count_frame++;
-
-			moveJet();
-			moveEnemies();
-			moveProjectiles();
-
-			if(count_frame % 7 == 0) {
-				jetfighter.rolling();
-
-			}
-
-			if(count_frame % 5 == 0) {
-				armedJet();
-			}
-
-			if(count_frame % 120 == 0) {
-				spamEnemies();
-			}
-
-			if(count_frame % 200 == 0) {
-				spamAestroids();
-			}
-
-			if(count_frame % 250 == 0) {
-				enemyFire();
-			}
-
-			if(count_frame > 1000) count_frame = 1;
-//			System.out.println(count_frame);
-
-			client.getIO().send("data");
-
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -388,17 +434,29 @@ public class Game extends JFrame implements Runnable {
 	}
 
 	public synchronized void start() {
-		Server server = new Server();
-		server.start();
-
-		client = new Client();
-		client.start();
 		new Thread(this).start();
 	}
 
 	public static void main(String[] args) {
-		Game myGame = new Game();
-		myGame.start();
+		String message = "Do you want to run the server?";
+		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
+		if(option == 0) {
+			Server server = new Server();
+			server.start();
+		}
+		Client client = new Client();
+		client.start();
 	}
 
+	public SyncState composeState() {
+		return new SyncState(projectiles, explosions, enemies, jetfighters, jetfighter );
+	}
+	
+	public void decomposeState(SyncState state) {
+		this.projectiles = state.getProjectiles();
+		this.explosions = state.getExplosions();
+		this.enemies = state.getEnemies();
+		this.jetfighters = state.getJetfighters();
+		this.jetfighter = state.getJetfighter();
+	}
 }

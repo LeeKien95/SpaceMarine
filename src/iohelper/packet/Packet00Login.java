@@ -11,17 +11,25 @@ public class Packet00Login extends Packet {
 	    this.name = name;
     }
     
+    public Packet00Login (byte[] data) {
+    	super(00);
+    	this.name = new String(data).trim().substring(2);
+    }
+    
     @Override
     public byte[] getData() {
     	return ("00" + name).getBytes(); 
     }
 
 	public void writeData(Server server) {
-		server.getIO().sendDataToProperClient(getData());
+		server.sendDataToProperClient(getData());
 	}
 
 	public void writeData(Client client) {
 		client.getIO().sendData(getData());		
 	}
-    
+	
+	public String getPlayerName() {
+		return name;
+	}
 }

@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import common.Constant;
 import iohelper.SocketIO;
 
 public class ClientIO extends SocketIO {
@@ -13,8 +14,17 @@ public class ClientIO extends SocketIO {
 		super();
 		try {
 			this.serverSocket = new DatagramSocket();
-			this.host = serverSocket.getInetAddress();
-			this.port = serverSocket.getPort();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ClientIO (InetAddress ipAddress, int port) {
+		super();
+		try {
+			this.serverSocket = new DatagramSocket();
+			this.host = ipAddress;
+			this.port = port;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -23,7 +33,7 @@ public class ClientIO extends SocketIO {
 	@Override
 	public void sendData(byte[] data) {
 		try {
-			serverSocket.send(new DatagramPacket(data, data.length, host, port));
+			serverSocket.send(new DatagramPacket(data, data.length, InetAddress.getByName(Constant.HOST), Constant.PORT));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
