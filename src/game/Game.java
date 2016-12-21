@@ -2,7 +2,8 @@ package game;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-
+import network.GameClient;
+import network.GameServer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,6 +15,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Game extends JFrame implements Runnable {
@@ -35,6 +37,7 @@ public class Game extends JFrame implements Runnable {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 		
+		String name = JOptionPane.showInputDialog(this, "Please enter a username");
 		
 		jetImg = new HashMap<String, Image>();
 		enemyImg = new HashMap<String, Image>();
@@ -45,7 +48,9 @@ public class Game extends JFrame implements Runnable {
 		enemies = new ArrayList<Enemy>();
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
+		
 		jetfighter = new Player();
+		jetfighter.setName(name);
 		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
 		
@@ -75,7 +80,6 @@ public class Game extends JFrame implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		addKeyListener(myAnimation);
 		setVisible(true);
 	}
@@ -118,7 +122,9 @@ public class Game extends JFrame implements Runnable {
 		if(jetfighters.size() != 0) {
 			for(int i = 0; i < jetfighters.size(); i ++) {
 				if(!jetfighters.get(i).getStatus().equals("dead")) {
-					g.drawImage(jetImg.get("idle_"+ jetfighters.get(i).getImage()), jetfighters.get(i).getX(), jetfighters.get(i).getY(), 40,40, this);	
+					g.drawImage(jetImg.get("idle_"+ jetfighters.get(i).getImage()), jetfighters.get(i).getX(), jetfighters.get(i).getY(), 40,40, this);
+					g.setColor(Color.green);
+					g.drawString(jetfighters.get(i).getName(), jetfighters.get(i).getX(),  jetfighters.get(i).getY());
 				}
 			}
 		}
@@ -331,6 +337,10 @@ public class Game extends JFrame implements Runnable {
 		System.exit(0);
 	}
 	
+	
+	private GameClient socketClient;
+	private GameServer socketServer;
+	
 	@Override
 	public void run() {
 		int count_frame = 0;
@@ -374,12 +384,24 @@ public class Game extends JFrame implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 		}
+	}
+	
+	public synchronized void start() {
+		new Thread(this).start();
+
+		if(JOptionPane.showConfirmDialog(this,  "Do you want to run the server") == 0) {
+			socketServer = new GameServer(this);
+			socketServer.start();
+		}
+		socketClient = new GameClient(this, "localhost");
+		socketClient.start();
 	}
 
 	public static void main(String[] args) {
 		Game myGame = new Game();
-		myGame.run();
+		myGame.start();
 	}
 	
 }

@@ -9,19 +9,15 @@ import java.net.UnknownHostException;
 
 import game.Game;
 
-public class GameClient extends Thread {
-	private InetAddress ipAddress;
+public class GameServer extends Thread {
 	private DatagramSocket socket;
 	private Game game;
 	
-	public GameClient(Game game, String ipAddress) {
+	public GameServer(Game game) {
 		this.game = game;
 		try {
-			this.socket = new DatagramSocket();
-			this.ipAddress = InetAddress.getByName(ipAddress);
+			this.socket = new DatagramSocket(1331);
 		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
 	}
@@ -36,12 +32,18 @@ public class GameClient extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			String message = new String(packet.getData());
+			System.out.println("Client > " + message);
+			if(message.equalsIgnoreCase("ping")) {		
+				sendData("pong".getBytes(), packet.getAddress(), packet.getPort());
+			}
 			System.out.println("Server > " + new String(packet.getData()));
 		}
 	}
 	
-	public void sendData(byte[] data) {
-		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, 1331);
+	public void sendData(byte[] data, InetAddress ipAddress, int port) {
+		DatagramPacket packet = new DatagramPacket(data, data.length, ipAddress, port);
 		try {
 			socket.send((packet));
 		} catch (IOException e) {
