@@ -1,9 +1,5 @@
 package game;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
-
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
