@@ -1,7 +1,5 @@
 package game;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
 import network.GameClient;
 import network.GameServer;
 
@@ -391,10 +389,7 @@ public class Game extends JFrame implements Runnable {
 	public synchronized void start() {
 		new Thread(this).start();
 
-		if(JOptionPane.showConfirmDialog(this,  "Do you want to run the server") == 0) {
-			socketServer = new GameServer(this);
-			socketServer.start();
-		}
+		
 		socketClient = new GameClient(this, "localhost");
 		socketClient.start();
 	}
