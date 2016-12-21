@@ -2,7 +2,9 @@ package game;
 
 import java.util.Random;
 
-public class Player {
+import client.Client;
+
+public class Player extends Client {
 	private String name;
 	private String type;
 	private int image;
@@ -11,13 +13,13 @@ public class Player {
 	private final int step = 5;
 	
 	
-	public String getName() {
+	public String getUsername() {
 		return name;
 	}
 
 
 
-	public void setName(String name) {
+	public void setUsername(String name) {
 		this.name = name;
 	}
 
@@ -99,6 +101,7 @@ public class Player {
 	
 
 	public Player() {
+		super();
 		Random rand = new Random();
 		int number = rand.nextInt(1000) +1;
 		this.setName("Jet fighter " + number);

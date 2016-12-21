@@ -29,6 +29,10 @@ public abstract class SocketIO {
 	public InetAddress getHost() {
 		return host;
 	}
+	
+	public int getPort() {
+		return port;
+	}
 
 	public DatagramPacket getPacket() {
 		byte[] buf = new byte[1024];

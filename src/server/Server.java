@@ -19,4 +19,8 @@ public class Server extends Thread {
 		  }
 	  }
   }
+  
+  public ServerIO getIO () {
+	  return io;
+  }
 }

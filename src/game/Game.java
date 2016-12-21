@@ -50,7 +50,7 @@ public class Game extends JFrame implements Runnable {
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
 
-		jetfighter = new Player();
+		jetfighter = new Player();   // NOTE server se khong khoi tao player, ma cho player gui thong tin den, roi moi dung tt nay de khoi tao
 		jetfighter.setName(name);
 		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
