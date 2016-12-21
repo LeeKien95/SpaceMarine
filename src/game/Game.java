@@ -1,8 +1,5 @@
 package game;
 
-import network.GameClient;
-import network.GameServer;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -16,6 +13,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import client.Client;
+import server.Server;
+
+
+
 public class Game extends JFrame implements Runnable {
 	Image dbImage, backgroundImage, enemyBullet, jetBullet;
 	HashMap<String, Image> jetImg, enemyImg;
@@ -28,6 +30,7 @@ public class Game extends JFrame implements Runnable {
 	JPanel background;
 	ArrayList<Player> jetfighters;
 	Player jetfighter;
+	Client client ;
 	
 	public Game() {
 		super("Test");
@@ -96,11 +99,11 @@ public class Game extends JFrame implements Runnable {
 		paintEnemies(g);
 		paintProjectiles(g);
 		paintExplosion(g);
-		g.setColor(Color.green);
-		
-		if(myAnimation.lastKeyPressed!=null) {
-			g.drawString(myAnimation.lastKeyPressed, 100, 100);
-		}
+//		g.setColor(Color.green);
+//		
+//		if(myAnimation.lastKeyPressed!=null) {
+//			g.drawString(myAnimation.lastKeyPressed, 100, 100);
+//		}
 	}
 	
 	private void paintBackground(Graphics g) {
@@ -120,7 +123,7 @@ public class Game extends JFrame implements Runnable {
 		if(jetfighters.size() != 0) {
 			for(int i = 0; i < jetfighters.size(); i ++) {
 				if(!jetfighters.get(i).getStatus().equals("dead")) {
-					g.drawImage(jetImg.get("idle_"+ jetfighters.get(i).getImage()), jetfighters.get(i).getX(), jetfighters.get(i).getY(), 40,40, this);
+					g.drawImage(jetImg.get("idle_"+ jetfighters.get(i).getImage()), jetfighters.get(i).getX(), jetfighters.get(i).getY(), 40,40, this);	
 					g.setColor(Color.green);
 					g.drawString(jetfighters.get(i).getName(), jetfighters.get(i).getX(),  jetfighters.get(i).getY());
 				}
@@ -179,7 +182,7 @@ public class Game extends JFrame implements Runnable {
 	//spam enemies
 	public void spamEnemies() {
 		for(int i = 0; i < 5; i++) {
-			enemies.add(new Enemy());	
+			enemies.add(new Enemy());
 		}
 	}
 	
@@ -191,7 +194,7 @@ public class Game extends JFrame implements Runnable {
 			aestroid.x = rand.nextInt(770) + 1;
 			aestroid.y = 1;
 			aestroid.image = rand.nextInt(4);
-			int number = rand.nextInt(2) - 1;
+			int number = rand.nextInt(3) - 1;
 			aestroid.xDirection = number;
 			aestroid.yDirection = 1;
 			aestroid.step = rand.nextInt(5) + 1;
@@ -204,7 +207,7 @@ public class Game extends JFrame implements Runnable {
 	public void enemyFire() {
 		Random rand = new Random();
 		if(enemies.size() > 3) {
-			for(int i = 0; i < 2; i++) {
+			for(int i = 0; i < 3; i++) {
 				Projectile bullet = new Projectile();
 				bullet.xDirection = 0;
 				bullet.yDirection = 1;
@@ -234,7 +237,7 @@ public class Game extends JFrame implements Runnable {
 	
 	//control jetfighter
 	public void moveJet() {
-		if(myAnimation.lastKeyPressed != null ) {
+		if(myAnimation.lastKeyPressed != null) {
 			if(jetfighters.size() != 0) {
 				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());	
 			}	
@@ -272,7 +275,7 @@ public class Game extends JFrame implements Runnable {
 		double x = Math.abs(x2 - x1);
 		double y = Math.abs(y2 - y1);
 		double distance = Math.sqrt(x*x + y*y);
-		if(distance < 40) {
+		if(distance < 30) {
 			return true;
 		} else {
 			return false;	
@@ -369,14 +372,15 @@ public class Game extends JFrame implements Runnable {
 				spamAestroids();
 			}
 			
-			if(count_frame % 300 == 0) {
+			if(count_frame % 250 == 0) {
 				enemyFire();
 			}
 			
 			if(count_frame > 1000) count_frame = 1;
 //			System.out.println(count_frame);
-			String data = "" + count_frame;
-			socketClient.sendData(data.getBytes());
+			
+			client.getIO().send("data");
+			
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -388,12 +392,11 @@ public class Game extends JFrame implements Runnable {
 	}
 	
 	public synchronized void start() {
+		Server server = new Server();
+		server.start();
 		
-
-		socketServer = new GameServer(this);
-		socketServer.start();
-		socketClient = new GameClient(this, "localhost");
-		socketClient.start();
+		client = new Client();
+		client.start();
 		new Thread(this).start();
 	}
 
