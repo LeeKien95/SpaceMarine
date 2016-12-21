@@ -339,9 +339,6 @@ public class Game extends JFrame implements Runnable {
 	}
 	
 	
-	private GameClient socketClient;
-	private GameServer socketServer;
-	
 	@Override
 	public void run() {
 		int count_frame = 0;
