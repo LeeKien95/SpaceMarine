@@ -389,7 +389,8 @@ public class Game extends JFrame implements Runnable {
 	public synchronized void start() {
 		new Thread(this).start();
 
-		
+		socketServer = new GameServer(this);
+		socketServer.start();
 		socketClient = new GameClient(this, "localhost");
 		socketClient.start();
 	}
