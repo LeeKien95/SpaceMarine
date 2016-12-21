@@ -1,8 +1,5 @@
 package game;
 
-import network.GameClient;
-import network.GameServer;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -16,27 +13,33 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import client.Client;
+import server.Server;
+
+
+
 public class Game extends JFrame implements Runnable {
 	Image dbImage, backgroundImage, enemyBullet, jetBullet;
 	HashMap<String, Image> jetImg, enemyImg;
 	ArrayList<Projectile> projectiles, explosions;
 	ArrayList<Enemy> enemies;
 	ArrayList<Image> aestroids, enemyExplosion, jetExplosion;
-	
+
 	Graphics dbg;
 	Animation myAnimation;
 	JPanel background;
 	ArrayList<Player> jetfighters;
 	Player jetfighter;
-	
+	Client client ;
+
 	public Game() {
 		super("Test");
 		setSize(800,600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
-		
+
 		String name = JOptionPane.showInputDialog(this, "Please enter a username");
-		
+
 		jetImg = new HashMap<String, Image>();
 		enemyImg = new HashMap<String, Image>();
 		jetExplosion = new ArrayList<Image>();
@@ -46,12 +49,12 @@ public class Game extends JFrame implements Runnable {
 		enemies = new ArrayList<Enemy>();
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
-		
+
 		jetfighter = new Player();
 		jetfighter.setName(name);
 		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
-		
+
 		//load images
 		try {
 			int i;
@@ -63,17 +66,17 @@ public class Game extends JFrame implements Runnable {
 				jetExplosion.add(ImageIO.read(new File("images/Effects/Blue Effects/1_" + i + ".png")));
 				enemyExplosion.add(ImageIO.read(new File("images/Effects/Red Explosion/1_" + i + ".png")));
 			}
-			
+
 			aestroids.add(ImageIO.read(new File("images/Aestroids/aestroid_brown.png")));
 			aestroids.add(ImageIO.read(new File("images/Aestroids/aestroid_dark.png")));
 			aestroids.add(ImageIO.read(new File("images/Aestroids/aestroid_gay_2.png")));
 			aestroids.add(ImageIO.read(new File("images/Aestroids/aestroid_gray.png")));
-			
-			
+
+
 			backgroundImage = ImageIO.read(new File("images/background.jpg"));
 			jetBullet = ImageIO.read(new File("images/Blue/bullet.png"));
 			enemyBullet = ImageIO.read(new File("images/Red/bullet_red.png"));
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -82,32 +85,32 @@ public class Game extends JFrame implements Runnable {
 		setVisible(true);
 	}
 
-	
+
 	public void paint(Graphics g) {
 		dbImage = createImage(getWidth(), getHeight());
 		dbg = dbImage.getGraphics();
 		paintComponent(dbg);
 		g.drawImage(dbImage, 0, 0, this);
 	}
-	
+
 	public void paintComponent(Graphics g) {
 		paintBackground(g);
 		paintJet(g);
 		paintEnemies(g);
 		paintProjectiles(g);
 		paintExplosion(g);
-		g.setColor(Color.green);
-		
-		if(myAnimation.lastKeyPressed!=null) {
-			g.drawString(myAnimation.lastKeyPressed, 100, 100);
-		}
+//		g.setColor(Color.green);
+//
+//		if(myAnimation.lastKeyPressed!=null) {
+//			g.drawString(myAnimation.lastKeyPressed, 100, 100);
+//		}
 	}
-	
+
 	private void paintBackground(Graphics g) {
 		g.drawImage(backgroundImage, 0, 0, this);
 	}
 
-	private void paintEnemies(Graphics g) {	
+	private void paintEnemies(Graphics g) {
 		if(enemies.size() != 0) {
 			for(int i = 0; i < enemies.size(); i++) {
 				g.drawImage(enemyImg.get("idle_"+ enemies.get(i).getImage()), enemies.get(i).getX(), enemies.get(i).getY(), 40,40, this);
@@ -127,10 +130,10 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 //		if(!jetfighter.getStatus().equals("dead")) {
-//			g.drawImage(jetImg.get("idle_"+ jetfighter.getImage()), jetfighter.getX(), jetfighter.getY(), 40,40, this);	
+//			g.drawImage(jetImg.get("idle_"+ jetfighter.getImage()), jetfighter.getX(), jetfighter.getY(), 40,40, this);
 //		}
 	}
-	
+
 	//paint bullets, aestroid.
 	private void paintProjectiles(Graphics g) {
 		// TODO Auto-generated method stub
@@ -148,10 +151,10 @@ public class Game extends JFrame implements Runnable {
 						}
 					}
 				}
-			}	
+			}
 		}
 	}
-	
+
 	//paint explosion
 	public void paintExplosion(Graphics g) {
 		if(explosions.size() != 0) {
@@ -164,7 +167,7 @@ public class Game extends JFrame implements Runnable {
 					}
 				}
 				explosions.get(i).rolling();
-				if(explosions.get(i).image == 16) {	
+				if(explosions.get(i).image == 16) {
 					if(explosions.get(i).type.equals("jetExplosion")) {
 						if(jetfighters.get(0).getStatus().equals("dead")) {
 							over();
@@ -175,14 +178,14 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 	}
-	
+
 	//spam enemies
 	public void spamEnemies() {
 		for(int i = 0; i < 5; i++) {
-			enemies.add(new Enemy());	
+			enemies.add(new Enemy());
 		}
 	}
-	
+
 	//spam aestroid
 	public void spamAestroids() {
 		for(int i = 0; i < 2; i++) {
@@ -191,7 +194,7 @@ public class Game extends JFrame implements Runnable {
 			aestroid.x = rand.nextInt(770) + 1;
 			aestroid.y = 1;
 			aestroid.image = rand.nextInt(4);
-			int number = rand.nextInt(2) - 1;
+			int number = rand.nextInt(3) - 1;
 			aestroid.xDirection = number;
 			aestroid.yDirection = 1;
 			aestroid.step = rand.nextInt(5) + 1;
@@ -199,12 +202,12 @@ public class Game extends JFrame implements Runnable {
 			projectiles.add(aestroid);
 		}
 	}
-	
+
 	//control enemies firearms
 	public void enemyFire() {
 		Random rand = new Random();
 		if(enemies.size() > 3) {
-			for(int i = 0; i < 2; i++) {
+			for(int i = 0; i < 3; i++) {
 				Projectile bullet = new Projectile();
 				bullet.xDirection = 0;
 				bullet.yDirection = 1;
@@ -231,16 +234,16 @@ public class Game extends JFrame implements Runnable {
 			projectiles.add(bullet);
 		}
 	}
-	
+
 	//control jetfighter
 	public void moveJet() {
 		if(myAnimation.lastKeyPressed != null ) {
 			if(jetfighters.size() != 0) {
-				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());	
-			}	
+				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());
+			}
 		}
 	}
-	
+
 	//move projectiles: bullet, aetroid..
 	public void moveProjectiles() {
 		if(projectiles.size()!= 0) {
@@ -253,7 +256,7 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 	}
-	
+
 	//move enemies
 	public void moveEnemies() {
 		if(enemies.size() != 0) {
@@ -263,23 +266,23 @@ public class Game extends JFrame implements Runnable {
 				} else {
 					enemies.remove(i);
 				}
-			}	
+			}
 		}
 	}
-	
+
 	//detect collision
 	public boolean collision(int x1, int y1, int x2, int y2){
 		double x = Math.abs(x2 - x1);
 		double y = Math.abs(y2 - y1);
 		double distance = Math.sqrt(x*x + y*y);
-		if(distance < 40) {
+		if(distance < 30) {
 			return true;
 		} else {
-			return false;	
+			return false;
 		}
 	}
-	
-	
+
+
 	//check if enemy collision with player or player's bullet collision with enemies.
 	public void startGameplay() {
 		int i = 0;
@@ -311,7 +314,7 @@ public class Game extends JFrame implements Runnable {
 						}
 					}
 				}
-				
+
 				//detect collision bw enemies and player
 				if(collision(enemies.get(i).x + 20, enemies.get(i).y + 20, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
 					enemies.get(i).status = "dead";
@@ -325,20 +328,20 @@ public class Game extends JFrame implements Runnable {
 				}
 			}
 		}
-		
-		
+
+
 	}
-	
+
 	//dead
 	public void over() {
-		
+
 		System.exit(0);
 	}
-	
-	
+
+
 	private GameClient socketClient;
 	private GameServer socketServer;
-	
+
 	@Override
 	public void run() {
 		int count_frame = 0;
@@ -347,56 +350,59 @@ public class Game extends JFrame implements Runnable {
 			startGameplay();
 			repaint();
 			count_frame++;
-			
+
 			moveJet();
 			moveEnemies();
 			moveProjectiles();
-			
+
 			if(count_frame % 7 == 0) {
 				jetfighter.rolling();
-				
+
 			}
-			
+
 			if(count_frame % 5 == 0) {
 				armedJet();
 			}
-			
+
 			if(count_frame % 120 == 0) {
 				spamEnemies();
 			}
-			
+
 			if(count_frame % 200 == 0) {
 				spamAestroids();
 			}
-			
-			if(count_frame % 300 == 0) {
+
+			if(count_frame % 250 == 0) {
 				enemyFire();
 			}
-			
+
 			if(count_frame > 1000) count_frame = 1;
 //			System.out.println(count_frame);
-			
+
+			client.getIO().send("data");
+
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
-	public synchronized void start() {
-		new Thread(this).start();
 
-		
-		socketClient = new GameClient(this, "localhost");
-		socketClient.start();
+	public synchronized void start() {
+		Server server = new Server();
+		server.start();
+
+		client = new Client();
+		client.start();
+		new Thread(this).start();
 	}
 
 	public static void main(String[] args) {
 		Game myGame = new Game();
 		myGame.start();
 	}
-	
+
 }

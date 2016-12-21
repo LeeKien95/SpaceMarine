@@ -8,8 +8,8 @@ public class Animation extends KeyAdapter{
 	public boolean isMoving = false;
 	public boolean isShot = false;
 	public String lastKeyPressed, status;
-	
-	
+
+
 	public boolean isMoving() {
 		return isMoving;
 	}
@@ -46,18 +46,18 @@ public class Animation extends KeyAdapter{
 	public void setyDirection(int yDirection) {
 		this.yDirection = yDirection;
 	}
-	
+
 	public void keyPressed(KeyEvent e) {
 		String key = KeyEvent.getKeyText(e.getKeyCode());
 		key = key.toLowerCase();
-		
+
 		if(key.equals("w") == true) {
 			setyDirection(-1);
 			setStatus("move");
 			isMoving = true;
-			lastKeyPressed = "up";			
+			lastKeyPressed = "up";
 		}
-		if(key.equals("s") == true) {	
+		if(key.equals("s") == true) {
 			setyDirection(1);
 			setStatus("move");
 			isMoving = true;
@@ -81,38 +81,38 @@ public class Animation extends KeyAdapter{
 			}
 		}
 	}
-	
+
 	public void keyReleased(KeyEvent e) {
 		String key = KeyEvent.getKeyText(e.getKeyCode());
 		key = key.toLowerCase();
 		if(key.equals("w")) {
 			setyDirection(0);
-			if((getxDirection() + getyDirection()) == 0) {		
-				isMoving = false;	
+			if((getxDirection() + getyDirection()) == 0) {
+				isMoving = false;
 			}
 		}
 		if(key.equals("s")) {
 			setyDirection(0);
 			if((getxDirection() + getyDirection()) == 0) {
-				isMoving = false;	
+				isMoving = false;
 			}
 		}
 		if(key.equals("a")) {
 			setxDirection(0);
-			if((getxDirection() + getyDirection()) == 0) {		
-				isMoving = false;	
+			if((getxDirection() + getyDirection()) == 0) {
+				isMoving = false;
 			}
 		}
 		if(key.equals("d")) {
 			setxDirection(0);
 			if((getxDirection() + getyDirection()) == 0) {
-				isMoving = false;	
+				isMoving = false;
 			}
 		}
 		if(key.equals("j")) {
 			isShot = false;
 		}
-		
+
 	}
 
 }
