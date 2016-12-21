@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 import common.Constant;
 import common.Serializer;
 
-public class SocketIO {
+public abstract class SocketIO {
 	protected DatagramSocket serverSocket;
 	// protected int port;
 	protected DatagramPacket packet;
@@ -57,5 +57,8 @@ public class SocketIO {
 		packet = new DatagramPacket(buf, buf.length, host, port);
 		sendPacket(packet);
 	}
+	
+	public abstract void sendData(byte[] data);
+	public abstract void sendData(byte[] data, InetAddress ipAddress, int port);
 
 }
