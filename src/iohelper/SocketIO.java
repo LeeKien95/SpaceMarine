@@ -54,12 +54,8 @@ public class SocketIO {
 	public void send(Object obj) {
 		byte[] buf = Serializer.serialize(obj);
 		DatagramPacket packet;
-		try {
-			packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(Constant.CLIENT_HOST), Constant.PORT);
-			sendPacket(packet);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+		packet = new DatagramPacket(buf, buf.length, host, port);
+		sendPacket(packet);
 	}
 
 }

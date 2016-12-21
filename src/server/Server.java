@@ -13,7 +13,7 @@ public class Server extends Thread {
 		  DatagramPacket packet = new DatagramPacket(data, data.length);
 		  packet = io.getPacket();
 		  if (true) {
-			  System.out.println("Client < " + new String(packet.getData()));
+			  System.out.println("Client < " + packet.getAddress().toString() + ":" + packet.getPort());
 			  DatagramPacket res = new DatagramPacket("pong".getBytes(), "pong".getBytes().length, packet.getAddress(), packet.getPort());
 			  io.sendPacket(res);  
 		  }

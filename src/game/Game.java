@@ -12,6 +12,11 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import client.Client;
+import server.Server;
+
+
+
 public class Game extends JFrame implements Runnable {
 	Image dbImage, backgroundImage, enemyBullet, jetBullet;
 	HashMap<String, Image> jetImg, enemyImg;
@@ -24,6 +29,7 @@ public class Game extends JFrame implements Runnable {
 	JPanel background;
 	ArrayList<Player> jetfighters;
 	Player jetfighter;
+	Client client ;
 	
 	public Game() {
 		super("Test");
@@ -364,6 +370,8 @@ public class Game extends JFrame implements Runnable {
 			if(count_frame > 1000) count_frame = 1;
 //			System.out.println(count_frame);
 			
+			client.getIO().send("data");
+			
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -372,10 +380,18 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 	}
+	
+	public synchronized void start() {
+		Server server = new Server();
+		server.start();
+		
+		client = new Client();
+		new Thread(this).start();
+	}
 
 	public static void main(String[] args) {
 		Game myGame = new Game();
-		myGame.run();
+		myGame.start();
 	}
 	
 }
