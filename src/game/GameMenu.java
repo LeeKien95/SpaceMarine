@@ -28,12 +28,8 @@ public class GameMenu extends Application {
 	}
 	
 	public void startSingleplay() throws IOException {
-		FXMLLoader loader = new FXMLLoader();
-		loader.setLocation(getClass().getResource("/game/view/GameMenu.fxml"));
-		mainLayout = loader.load();
-		Scene scene = new Scene(mainLayout);
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		Game myGame = new Game();
+		myGame.run();
 	}
 	
 	public void startMultiplay() throws IOException {
