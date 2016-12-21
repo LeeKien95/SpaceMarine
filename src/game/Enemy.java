@@ -60,7 +60,7 @@ public class Enemy {
 		setX(number);
 		setY(1);
 		setStep(rand.nextInt(7)+1);
-		number = rand.nextInt(2) - 1;
+		number = rand.nextInt(3) - 1;
 		setxDirection(number);
 		setyDirection(1);
 		setStatus("visible");

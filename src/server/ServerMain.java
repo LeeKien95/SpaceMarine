@@ -11,12 +11,12 @@ public class ServerMain {
 		  Server server = new Server();
 		  server.start();
 		  
-		  Client client = new Client();
-		  client.start();
-		  try {
-			client.getIO().sendPacket(new DatagramPacket("ping".getBytes(), "ping".getBytes().length, InetAddress.getByName("localhost"), 1331));
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+//		  Client client = new Client();
+//		  client.start();
+//		  try {
+//			client.getIO().sendPacket(new DatagramPacket("ping".getBytes(), "ping".getBytes().length, InetAddress.getByName("localhost"), 1331));
+//		} catch (UnknownHostException e) {
+//			e.printStackTrace();
+//		}
   }
 }

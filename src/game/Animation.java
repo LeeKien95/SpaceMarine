@@ -103,7 +103,7 @@ public class Animation extends KeyAdapter{
 				isMoving = false;	
 			}
 		}
-		if(key.equals("d ")) {
+		if(key.equals("d")) {
 			setxDirection(0);
 			if((getxDirection() + getyDirection()) == 0) {
 				isMoving = false;	
