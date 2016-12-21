@@ -236,7 +236,7 @@ public class Game extends JFrame implements Runnable {
 	
 	//control jetfighter
 	public void moveJet() {
-		if(myAnimation.lastKeyPressed != null && myAnimation.isMoving) {
+		if(myAnimation.lastKeyPressed != null ) {
 			if(jetfighters.size() != 0) {
 				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());	
 			}	
