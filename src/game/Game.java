@@ -375,7 +375,8 @@ public class Game extends JFrame implements Runnable {
 			
 			if(count_frame > 1000) count_frame = 1;
 //			System.out.println(count_frame);
-			
+			String data = "" + count_frame;
+			socketClient.sendData(data.getBytes());
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -387,12 +388,13 @@ public class Game extends JFrame implements Runnable {
 	}
 	
 	public synchronized void start() {
-		new Thread(this).start();
+		
 
 		socketServer = new GameServer(this);
 		socketServer.start();
 		socketClient = new GameClient(this, "localhost");
 		socketClient.start();
+		new Thread(this).start();
 	}
 
 	public static void main(String[] args) {
