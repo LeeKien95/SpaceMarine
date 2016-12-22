@@ -265,8 +265,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 			Projectile bullet = new Projectile();
 			bullet.xDirection = 0;
 			bullet.yDirection = -1;
-			bullet.x = jetfighter.getX();
-			bullet.y = jetfighter.getY();
+			bullet.x = getCurrentPlayer().getX();
+			bullet.y = getCurrentPlayer().getY();
 			bullet.visible = true;
 			bullet.type = "bullet";
 			projectiles.add(bullet);
