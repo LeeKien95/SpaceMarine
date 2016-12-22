@@ -61,12 +61,15 @@ public class Client extends Thread {
 	  
 	  String name = JOptionPane.showInputDialog(this, "Please enter a username");
 	  Packet00Login loginPacket = new Packet00Login(name != null? name: "Starfighter " + new Random().nextInt(100) +1);
+	  
+	  game.setCurrentPlayerName(name);
+
 	  // Sent login to server
 	  loginPacket.writeData(this);
 	  System.out.println("Sent");
 
 	  
-	  
+	 
 
 	  DatagramPacket packet;
 	  int check = 0;
@@ -97,6 +100,7 @@ public class Client extends Thread {
 		  game.decomposeState(statePacket.getState());
 		  
 		  //send packet
+		  System.out.println(game.currentUsername);
 		  
 	  }
 

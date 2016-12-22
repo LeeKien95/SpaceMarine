@@ -158,7 +158,6 @@ public class Server extends Thread {
 
 			// Them player moi vao game
 			Player newPlayer = new Player(packet.getPlayerName(), address, port);
-			game.setCurrentPlayerName(packet.getPlayerName());
 			game.jetfighters.add(newPlayer);
 
 //			// Send response to all client
@@ -175,6 +174,7 @@ public class Server extends Thread {
 			// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
 			// DUNG actionPacket.getClientName(), getXDirection()....
 //			System.out.println("received " + actionPacket.isShot());
+			System.out.println(game.currentUsername);
 			game.moveJet(actionPacket.getClientName(), actionPacket.getxDirection(), actionPacket.getyDirection(),
 					actionPacket.isMoving(), actionPacket.isShot());
 			break;

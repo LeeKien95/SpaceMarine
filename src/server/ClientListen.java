@@ -54,7 +54,6 @@ class ClientListen implements Runnable {
 //				this.server.getGame().setLocked(false);
 				
 				parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
-				System.out.println("Still run getRequest");
 				this.server.getFlag().notifyAll();
 			}
 			

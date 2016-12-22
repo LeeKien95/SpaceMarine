@@ -312,6 +312,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public void moveJet() {
 		if(myAnimation.lastKeyPressed != null && myAnimation.isMoving) {
 			if(jetfighters.size() != 0) {
+				//System.out.println(currentUsername);
 				getCurrentPlayer().move(myAnimation.getxDirection(), myAnimation.getyDirection());
 			}
 //			send data to server
@@ -485,11 +486,11 @@ public class Game extends JFrame implements Runnable, Serializable {
 //			armedJet();
 //		}
 
-		if(count_frame % 120 == 0) {
+		if(count_frame % 900 == 0) {
 			spamEnemies();
 		}
 
-		if(count_frame % 200 == 0) {
+		if(count_frame % 900 == 0) {
 			spamAestroids();
 		}
 
@@ -676,7 +677,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 
 	public SyncState composeState() {
-		return new SyncState(new ArrayList(projectiles), new ArrayList(explosions), new ArrayList(enemies), new ArrayList(jetfighters), currentUsername);
+		return new SyncState(new ArrayList(projectiles), new ArrayList(explosions), new ArrayList(enemies), new ArrayList(jetfighters));
 	}
 	
 	public void decomposeState(SyncState state) {
@@ -684,7 +685,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		this.explosions = state.getExplosions();
 		this.enemies = state.getEnemies();
 		this.jetfighters = state.getJetfighters();
-		this.currentUsername = state.getCurrentUsername();
 	}
 
 	public boolean isChanged() {
