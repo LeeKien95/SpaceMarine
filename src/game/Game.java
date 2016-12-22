@@ -49,6 +49,15 @@ public class Game extends JFrame implements Runnable, Serializable {
 	
 	public boolean isChanged = false;
 	private Packet02ClientAction clientPacket;
+	public boolean isLocked = false;
+
+	public boolean isLocked() {
+		return isLocked;
+	}
+
+	public void setLocked(boolean isLocked) {
+		this.isLocked = isLocked;
+	}
 
 	public Game() {
 		super("Test");
@@ -651,7 +660,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 
 	public SyncState composeState() {
-		return new SyncState(projectiles, explosions, enemies, jetfighters, currentUsername);
+		return new SyncState(new ArrayList(projectiles), new ArrayList(explosions), new ArrayList(enemies), new ArrayList(jetfighters), currentUsername);
 	}
 	
 	public void decomposeState(SyncState state) {

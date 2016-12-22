@@ -34,7 +34,37 @@ public class Server extends Thread {
 	public void run() {
 		while(true) {
 			server.sendResponse();
-			yield();
+//			try {
+//				server.sendResponse();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+////			if(server.game.isChanged) {
+////				Packet02ClientAction actionPacket = client.game.getClientPacket();
+////				actionPacket.writeData(client);
+////			}	
+		}
+	}
+	  
+  }
+  
+  class ClientListen implements Runnable {
+	  private Server server;
+
+	public ClientListen(Server server) {
+		this.server = server;
+	}
+
+	@Override
+	public void run() {
+		while(true) {
+			try {
+				server.getRequest();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 //			if(server.game.isChanged) {
 //				Packet02ClientAction actionPacket = client.game.getClientPacket();
 //				actionPacket.writeData(client);
@@ -43,7 +73,6 @@ public class Server extends Thread {
 	}
 	  
   }
-
 	
   public void run() {
 	  // The game for all client
@@ -56,32 +85,60 @@ public class Server extends Thread {
 	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
 	  // getRequest();
 	  
+	  ClientListen listen = new ClientListen(this);
+	  Thread listenThread = new Thread(listen);
+	  listenThread.start();
+	  
 	  SyncGameState syncGameState = new SyncGameState(this);
 	  Thread syncThread = new Thread(syncGameState);
 	  syncThread.start();
 	  
-	  while (true) {
-		  getRequest();
-		  // sendResponse();
-		  try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	  }
+//	  while (true) {
+//		  getRequest();
+//		  // sendResponse();
+//		  try {
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//	  }
   }
   
   public void sendResponse() {
 	  // Send current game state to all client (TODO send to each specific room)
 	  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
 	  responsePacket.writeData(this);
+	  
+//	  synchronized(game) {
+//		  while (game.isLocked) {
+//			  System.out.println("Wait for it...");
+//			  game.wait();
+//		  }
+//		  
+//		  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
+//		  responsePacket.writeData(this);
+//		  game.notifyAll();
+//	  }
   }
   
-  private void getRequest() {
+  private void getRequest() throws InterruptedException {
 	  // Get the packets and parse them
-	  DatagramPacket packet =  io.getPacket();
-	  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+	  synchronized(game) {
+
+		  while (game.isLocked) {
+			  System.out.println("Wait for it...");
+			  game.wait();
+		  }
+		  
+		  DatagramPacket packet =  io.getPacket();
+		  System.out.println("got a request");
+
+		  game.setLocked(true);
+		  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+		  game.setLocked(false);
+		  game.notifyAll();
+	  }
   }
   
   // Xu ly packet truyen toi tuy theo packetType
@@ -103,8 +160,8 @@ public class Server extends Thread {
 		game.jetfighters.add(newPlayer);
 		
 		// Send response to all client
-		sendResponse();
-    	break;
+		 Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
+		 responsePacket.writeData(this);
     case SYNC:
     	
     	break;

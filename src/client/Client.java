@@ -57,6 +57,8 @@ public class Client extends Thread {
 	  Packet00Login loginPacket = new Packet00Login(name != null? name: "Starfighter " + new Random().nextInt(100) +1);
 	  // Sent login to server
 	  loginPacket.writeData(this);
+	  System.out.println("Sent");
+
 	  
 	  
 	  game.isClient = true;
