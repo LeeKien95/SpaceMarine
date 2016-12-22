@@ -256,11 +256,13 @@ public class Game extends JFrame implements Runnable, Serializable {
 			Projectile bullet = new Projectile();
 			bullet.xDirection = 0;
 			bullet.yDirection = -1;
-			bullet.x = jetfighter.getX();
-			bullet.y = jetfighter.getY();
+			bullet.x = getCurrentPlayer().getX();
+			bullet.y = getCurrentPlayer().getY();
 			bullet.visible = true;
 			bullet.type = "bullet";
 			projectiles.add(bullet);
+//			send data to client
+			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
 		}
 	}
 
@@ -268,12 +270,23 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public void moveJet() {
 		if(myAnimation.lastKeyPressed != null && myAnimation.isMoving) {
 			if(jetfighters.size() != 0) {
-				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());
+				getCurrentPlayer().move(myAnimation.getxDirection(), myAnimation.getyDirection());
 			}
+//			send data to server
+			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
 			
 		}
 	}
 	
+	public void moveJet(String name, int xDirection, int yDirection, boolean isMoving, boolean isShot) {
+		for(Player p : jetfighters) {
+			if(p.getName().equals(name)) {
+				if(isShot) {
+					
+				}
+			}
+		}
+	}
 
 	//move projectiles: bullet, aetroid..
 	public void moveProjectiles() {
