@@ -12,6 +12,7 @@ import iohelper.packet.Packet;
 import iohelper.packet.Packet.PacketTypes;
 import iohelper.packet.Packet00Login;
 import iohelper.packet.Packet01SyncState;
+import iohelper.packet.Packet02ClientAction;
 
 public class Server extends Thread {
 	private ServerIO io;
@@ -28,6 +29,7 @@ public class Server extends Thread {
 	  game.start();
 	  
 	  // Continuously get request and send response to proper client (TODO implement Room feature)
+	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
 	  while (true) {
 		  getRequest();
 		  sendResponse();
@@ -35,12 +37,13 @@ public class Server extends Thread {
   }
   
   private void sendResponse() {
-	  // Send current game state to all client (TODO send to one specific room)
+	  // Send current game state to all client (TODO send to each specific room)
 	  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
 	  responsePacket.writeData(this);
   }
-
+  
   private void getRequest() {
+	  // Get the packets and parse them
 	  DatagramPacket packet =  io.getPacket();
 	  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
   }
@@ -54,15 +57,26 @@ public class Server extends Thread {
     case INVALID:
     	break;
     case LOGIN:
+    	// Convert data to Packet to use the actual meaningful data
     	Packet00Login packet = new Packet00Login(data);
     	System.out.println(address+":"+port+" has connected...");
     	
     	// Them player moi vao game
 		game.jetfighter = new Player(packet.getPlayerName(), address, port);
 		game.jetfighters.add(game.jetfighter);
+		
+		// Send response to all client
+		sendResponse();
     	break;
     case SYNC:
     	
+    	break;
+    	
+    case ACTION:
+    	Packet02ClientAction actionPacket = new Packet02ClientAction(data);
+    	System.out.println("Got an action from client " + address.getHostName() + ":" + port);
+    	// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
+    	// DUNG actionPacket.getClientName(), getXDirection()....
     	break;
     
     case DISCONNECT:
