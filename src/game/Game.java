@@ -34,8 +34,8 @@ public class Game extends JFrame implements Runnable {
 	public int kill_mark;
 	public int kill_count = 0;
 	public int level = 1;
-	public String message;
-	public int count_frame = 0, respawn= 0;
+	public String message = "";
+	public int count_frame = 0, respawn= 0, messageTimeOut = 0;
 	public boolean isServer = false;
 	public boolean isClient = false;
 	
@@ -181,7 +181,6 @@ public class Game extends JFrame implements Runnable {
 				}
 				explosions.get(i).rolling();
 				if(explosions.get(i).image == 16) {	
-					
 					explosions.remove(i);
 				}
 			}
@@ -190,14 +189,14 @@ public class Game extends JFrame implements Runnable {
 	
 	//spam enemies
 	public void spamEnemies() {
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < (5+ this.level); i++) {
 			enemies.add(new Enemy());
 		}
 	}
 	
 	//spam aestroid
 	public void spamAestroids() {
-		for(int i = 0; i < 2; i++) {
+		for(int i = 0; i < 2 + this.level; i++) {
 			Projectile aestroid = new Projectile();
 			Random rand = new Random();
 			aestroid.x = rand.nextInt(770) + 1;
@@ -292,7 +291,11 @@ public class Game extends JFrame implements Runnable {
 	}
 	
 	public void levelup() {
-		this.message = "Yay! You're level UP! Press enter to suffer more! ;) ";
+		this.message = "Level UP!";
+		this.level++;
+		this.kill_mark = level*10*jetfighters.size();
+		this.kill_count = 0;
+		
 	}
 	
 	//check if enemy collision with player or player's bullet collision with enemies.
@@ -313,7 +316,7 @@ public class Game extends JFrame implements Runnable {
 							projectiles.get(i).visible = false;
 						}
 						if(!projectiles.get(j).type.equals("aestroid")) {
-							projectiles.remove(j).visible = false;
+							projectiles.get(j).visible = false;
 						}	
 					}
 				}
@@ -364,7 +367,16 @@ public class Game extends JFrame implements Runnable {
 			}
 		}
 		
+		System.out.println(this.level);
+		System.out.println("kill count: " + kill_count + ", kill mark: " + kill_mark);
+		if(kill_count >= kill_mark) {
+			levelup();
+		}
+		
 		if(respawn > 0) respawn--;
+		if(messageTimeOut > 0) messageTimeOut--; else {
+			this.message = "";
+		}
 		count_frame++;
 		moveJet();
 		moveEnemies();
@@ -397,6 +409,7 @@ public class Game extends JFrame implements Runnable {
 	//dead
 	public void over() {
 		String message = "I'm the one with the force, the force is with me..";
+		messageTimeOut = 120;
 		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
 		if(option == 0) {
 			for(int i = 0; i < jetfighters.size(); i ++) {
