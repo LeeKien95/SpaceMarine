@@ -22,7 +22,7 @@ public class Server extends Thread {
 
 	public Server() {
 		this.io = new ServerIO();
-		this.game = new Game();
+		this.game = new Game(false, true);
 		this.flag = new Object();
 		game.isServer = true;
 		game.isClient = false;
