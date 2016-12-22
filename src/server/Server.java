@@ -30,12 +30,12 @@ public class Server extends Thread {
 	  
 	  // Continuously get request and send response to proper client (TODO implement Room feature)
 	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
-	  getRequest();
+	  
 	  while (true) {
-		  
+		  getRequest();
 		  sendResponse();
 		  try {
-				Thread.sleep(17);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
