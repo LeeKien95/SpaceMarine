@@ -261,8 +261,9 @@ public class Game extends JFrame implements Runnable, Serializable {
 			bullet.visible = true;
 			bullet.type = "bullet";
 			projectiles.add(bullet);
-//			send data to client
+// 			send to server
 			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
+			
 		}
 	}
 
