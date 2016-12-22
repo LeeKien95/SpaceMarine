@@ -49,6 +49,15 @@ public class Game extends JFrame implements Runnable, Serializable {
 	
 	public boolean isChanged = false;
 	private Packet02ClientAction clientPacket;
+	public boolean isLocked = false;
+
+	public boolean isLocked() {
+		return isLocked;
+	}
+
+	public void setLocked(boolean isLocked) {
+		this.isLocked = isLocked;
+	}
 
 	public Game() {
 		super("Test");
