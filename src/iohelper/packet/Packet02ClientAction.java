@@ -13,12 +13,17 @@ public class Packet02ClientAction extends Packet {
 	// Convert the data received from the packet to the data that we can actually use 
 	public Packet02ClientAction(byte[] data) {
 		super(02);
-		String parts[] = new String(data).split(",");
-		this.clientName = parts[0];
-		this.xDirection = Integer.parseInt(parts[1]);
-		this.yDirection = Integer.parseInt(parts[2]);
-		this.isMoving = Boolean.parseBoolean(parts[3]);
-		this.isShot = Boolean.parseBoolean(parts[4]);
+		
+		String s = new String(data);
+		String parts[] = s.split(",");
+		
+       
+		
+		this.clientName = parts[1];
+		this.xDirection = Integer.parseInt(parts[2]);
+		this.yDirection = Integer.parseInt(parts[3]);
+		this.isMoving = Boolean.parseBoolean(parts[4]);
+		this.isShot = Boolean.parseBoolean(parts[5].trim());
 	}
 	
 	public Packet02ClientAction(String clientName, Animation action) {
@@ -27,12 +32,12 @@ public class Packet02ClientAction extends Packet {
 		this.xDirection = action.getxDirection();
 		this.yDirection = action.getyDirection();
 		this.isMoving = action.isMoving();
-		this.isShot = action.isShot;
+		this.isShot = action.isShot();
 	}
 
 	@Override
 	public byte[] getData() {
-		return new String("02"+clientName+xDirection+yDirection+isMoving+isShot).getBytes();
+		return new String("02,"+clientName+","+xDirection+","+yDirection+","+isMoving+","+isShot).getBytes();
 	}
 
 	@Override

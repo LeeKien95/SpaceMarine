@@ -19,7 +19,9 @@ public class Client extends Thread {
   public Client () {
 	  this.io = new ClientIO();
 	  this.game = new Game();
-	  
+	  game.client = this;
+	  game.isClient = true;
+	  game.isServer = false;
   }
   
   public Client (InetAddress ipAddress, int port) {
@@ -32,21 +34,25 @@ public class Client extends Thread {
   
   class ClientListener implements Runnable {
 	  private Client client;
+	  private Game game;
 
-	public ClientListener(Client client) {
+	public ClientListener(Client client, Game game) {
 		this.client = client;
+		this.game = game;
 	}
 
 	@Override
 	public void run() {
 		while(true) {
-			if(client.game.isChanged) {
-				Packet02ClientAction actionPacket = client.game.getClientPacket();
+			
+			if(game.isChanged()) {
+				Packet02ClientAction actionPacket = game.getClientPacket();
 				actionPacket.writeData(client);
-			}	
+				game.setChanged(false);
+			}
+			
 		}
 	}
-	  
   }
   
 
@@ -61,8 +67,7 @@ public class Client extends Thread {
 
 	  
 	  
-	  game.isClient = true;
-	  game.isServer = false;
+
 	  DatagramPacket packet;
 	  int check = 0;
 	  
@@ -76,15 +81,18 @@ public class Client extends Thread {
 	  game.decomposeState(statePacket.getState());
 	  game.start();
 	  
-	  ClientListener clientListener = new ClientListener(this);
-	  Thread aThread = new Thread(clientListener);
-	  aThread.start();
+//	  ClientListener clientListener = new ClientListener(this, game);
+//	  Thread aThread = new Thread(clientListener);
+//	  aThread.start();
+	  
+	  
+	  
 	  
 	  // LIEN TUC CAP NHAT STATE GAME TU SERVER
 	  while (true) {
 		  // receive state
 		  packet = io.getPacket();
-		  System.out.println("Receive state ");
+//		  System.out.println("Receive state ");
 		  statePacket = new Packet01SyncState(packet.getData());
 		  game.decomposeState(statePacket.getState());
 		  

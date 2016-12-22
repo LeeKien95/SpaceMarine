@@ -47,16 +47,20 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public String currentUsername;
 	
 	
-	public boolean isChanged = false;
+	private boolean isChanged;
+	
+	//test
+	//
+	
 	private Packet02ClientAction clientPacket;
-	public boolean isLocked = false;
+	private boolean locked = false;
 
 	public boolean isLocked() {
-		return isLocked;
+		return locked;
 	}
 
 	public void setLocked(boolean isLocked) {
-		this.isLocked = isLocked;
+		this.locked = isLocked;
 	}
 
 	public Game() {
@@ -81,6 +85,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 //		jetfighter.setName(name==null? name: "Starfighters " + new Random().nextInt(1000) +1);
 //		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
+		
 
 		// add multiplayer to jetfighters;
 
@@ -117,8 +122,12 @@ public class Game extends JFrame implements Runnable, Serializable {
 			e.printStackTrace();
 		}
 		addKeyListener(myAnimation);
+		this.setChanged(false);
+		this.clientPacket = new Packet02ClientAction(currentUsername, myAnimation);
 		setVisible(true);
 	}
+	
+	
 	
 	public Player getCurrentPlayer() {
 		for (Player p : jetfighters) {
@@ -294,7 +303,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 // 			send to server
 			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
 			setClientPacket(packet);
-			isChanged = true;
+			sendData(client);
+//			setChanged(true);
 		}
 	}
 
@@ -307,8 +317,14 @@ public class Game extends JFrame implements Runnable, Serializable {
 //			send data to server
 			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
 			setClientPacket(packet);
-			isChanged = true;
-		}
+			sendData(client);
+//			this.setChanged(true);
+		} 
+	}
+	
+	public void sendData(Client client) {
+//		System.out.println("packet about to send: isShot: " + getClientPacket().isShot());
+		getClientPacket().writeData(client);
 	}
 	
 	public void moveJet(String name, int xDirection, int yDirection, boolean isMoving, boolean isShot) {
@@ -318,8 +334,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 					Projectile bullet = new Projectile();
 					bullet.xDirection = 0;
 					bullet.yDirection = -1;
-					bullet.x = getCurrentPlayer().getX();
-					bullet.y = getCurrentPlayer().getY();
+					bullet.x = p.getX();
+					bullet.y = p.getY();
 					bullet.visible = true;
 					bullet.type = "bullet";
 					projectiles.add(bullet);
@@ -587,7 +603,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 			armedJet();
 		}
 
-		if(count_frame % 120 == 0) {
+		if(count_frame % 200 == 0) {
 			spamEnemies();
 		}
 
@@ -644,7 +660,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		}
 	}
 
-	public synchronized void start() {
+	public void start() {
 		new Thread(this).start();
 	}
 
@@ -653,7 +669,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
 		if(option == 0) {
 			Server server = new Server();
-			server.start();
+//			server.start();
 		}
 //		Client client = new Client();
 //		client.start();
@@ -669,5 +685,13 @@ public class Game extends JFrame implements Runnable, Serializable {
 		this.enemies = state.getEnemies();
 		this.jetfighters = state.getJetfighters();
 		this.currentUsername = state.getCurrentUsername();
+	}
+
+	public boolean isChanged() {
+		return isChanged;
+	}
+
+	public void setChanged(boolean isChanged) {
+		this.isChanged = isChanged;
 	}
 }
