@@ -26,9 +26,10 @@ public class Client extends Thread {
   }
   
   public void run (){
-	  // Sent login to server
+	  
 	  String name = JOptionPane.showInputDialog(this, "Please enter a username");
-	  Packet00Login loginPacket = new Packet00Login(name==null? name: "Starfighter " + new Random().nextInt(100) +1);
+	  Packet00Login loginPacket = new Packet00Login(name != null? name: "Starfighter " + new Random().nextInt(100) +1);
+	  // Sent login to server
 	  loginPacket.writeData(this);
 	  
 	  Game game = new Game();
