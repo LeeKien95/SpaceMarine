@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import client.Client;
+import iohelper.packet.Packet02ClientAction;
 import iohelper.packet.SyncState;
 import server.Server;
 
@@ -43,6 +44,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public int count_frame = 0, respawn= 0, messageTimeOut = 0;
 	public boolean isServer = false;
 	public boolean isClient = false;
+
 
 
 	public Game() {
@@ -105,6 +107,10 @@ public class Game extends JFrame implements Runnable, Serializable {
 		addKeyListener(myAnimation);
 		setVisible(true);
 	}
+	
+	public Player getCurrentPlayer() {
+		return null;
+	}
     
 	public ArrayList<Player> getPlayers(){
 		return jetfighters;
@@ -151,6 +157,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 			for(int i = 0; i < jetfighters.size(); i ++) {
 				if(!jetfighters.get(i).getStatus().equals("dead")) {
 					g.drawImage(jetImg.get("idle_"+ jetfighters.get(i).getImage()), jetfighters.get(i).getX(), jetfighters.get(i).getY(), 40,40, this);
+					jetfighters.get(i).rolling();
 					g.setColor(Color.green);
 					g.drawString(jetfighters.get(i).getName(), jetfighters.get(i).getX(),  jetfighters.get(i).getY());
 				}
@@ -263,8 +270,10 @@ public class Game extends JFrame implements Runnable, Serializable {
 			if(jetfighters.size() != 0) {
 				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());
 			}
+			
 		}
 	}
+	
 
 	//move projectiles: bullet, aetroid..
 	public void moveProjectiles() {
@@ -321,7 +330,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		for(i = 0; i < jetfighters.size(); i++) {
 			if(!jetfighters.get(i).getStatus().equals("dead")) countAliveJet++;
 		}
-		if(jetfighters.size() > 0 && countAliveJet == 0) over();
+//		if(jetfighters.size() > 0 && countAliveJet == 0) over();
 
 		//check collision bw 2 projectiles
 		for(i = 0; i < projectiles.size(); i++) {
@@ -397,12 +406,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 //		moveJet();
 		moveEnemies();
 		moveProjectiles();
-
-		if(count_frame % 7 == 0) {
-			for(Player p : jetfighters) {
-				p.rolling();
-			}
-		}
 
 //		if(count_frame % 5 == 0) {
 //			armedJet();

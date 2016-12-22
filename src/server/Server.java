@@ -84,6 +84,7 @@ public class Server extends Thread {
     	System.out.println("Got an action from client " + address.getHostName() + ":" + port);
     	// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
     	// DUNG actionPacket.getClientName(), getXDirection()....
+    	
     	break;
     
     case DISCONNECT:
