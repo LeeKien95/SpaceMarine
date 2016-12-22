@@ -100,7 +100,6 @@ public class Client extends Thread {
 		  game.decomposeState(statePacket.getState());
 		  
 		  //send packet
-		  System.out.println(game.currentUsername);
 		  
 	  }
 

@@ -67,12 +67,13 @@ public abstract class Packet {
 	  Object result = null;
 	  try {
 			ObjectInputStream iStream = new ObjectInputStream(new ByteArrayInputStream(data));
-
+		
 			result = (SyncState) iStream.readObject();
 			iStream.close();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
+			System.out.println(new String(data));
 			e.printStackTrace();
 		}
 	  return result;

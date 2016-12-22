@@ -174,7 +174,6 @@ public class Server extends Thread {
 			// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
 			// DUNG actionPacket.getClientName(), getXDirection()....
 //			System.out.println("received " + actionPacket.isShot());
-			System.out.println(game.currentUsername);
 			game.moveJet(actionPacket.getClientName(), actionPacket.getxDirection(), actionPacket.getyDirection(),
 					actionPacket.isMoving(), actionPacket.isShot());
 			break;

@@ -406,7 +406,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		for(i = 0; i < jetfighters.size(); i++) {
 			if(!jetfighters.get(i).getStatus().equals("dead")) countAliveJet++;
 		}
-//		if(jetfighters.size() > 0 && countAliveJet == 0) over();
+		if(jetfighters.size() > 0 && countAliveJet == 0) over();
 
 		//check collision bw 2 projectiles
 		for(i = 0; i < projectiles.size(); i++) {
@@ -483,15 +483,15 @@ public class Game extends JFrame implements Runnable, Serializable {
 		moveEnemies();
 		moveProjectiles();
 
-//		if(count_frame % 5 == 0) {
-//			armedJet();
-//		}
+		if(count_frame % 10 == 0) {
+			armedJet();
+		}
 
-		if(count_frame % 900 == 0) {
+		if(count_frame % 300 == 0) {
 			spamEnemies();
 		}
 
-		if(count_frame % 900 == 0) {
+		if(count_frame % 300 == 0) {
 			spamAestroids();
 		}
 
@@ -507,7 +507,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	
 	public void clientProcess() {
 		moveJet();
-		if(count_frame % 5 == 0) {
+		if(count_frame % 10 == 0) {
 			armedJet();
 		}
 //		System.out.println(count_frame);
@@ -601,9 +601,9 @@ public class Game extends JFrame implements Runnable, Serializable {
 			}
 		}
 
-		if(count_frame % 5 == 0) {
-			armedJet();
-		}
+//		if(count_frame % 5 == 0) {
+//			armedJet();
+//		}
 
 		if(count_frame % 200 == 0) {
 			spamEnemies();
