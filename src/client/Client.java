@@ -87,6 +87,7 @@ public class Client extends Thread {
 		  game.decomposeState(statePacket.getState());
 		  
 		  //send packet
+		  
 	  }
 
   }
