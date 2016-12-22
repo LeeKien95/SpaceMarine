@@ -6,6 +6,7 @@ import java.util.Random;
 
 import javax.swing.JOptionPane;
 
+import client.Client;
 import game.Game;
 import game.Player;
 import iohelper.packet.Packet;
@@ -21,6 +22,29 @@ public class Server extends Thread {
 		this.io = new ServerIO();
 	}
 	
+	
+  class SyncGameState implements Runnable {
+	  private Server server;
+
+	public SyncGameState(Server server) {
+		this.server = server;
+	}
+
+	@Override
+	public void run() {
+		while(true) {
+			server.sendResponse();
+			yield();
+//			if(server.game.isChanged) {
+//				Packet02ClientAction actionPacket = client.game.getClientPacket();
+//				actionPacket.writeData(client);
+//			}	
+		}
+	}
+	  
+  }
+
+	
   public void run() {
 	  // The game for all client
 	  this.game = new Game();
@@ -31,9 +55,14 @@ public class Server extends Thread {
 	  // Continuously get request and send response to proper client (TODO implement Room feature)
 	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
 	  // getRequest();
+	  
+	  SyncGameState syncGameState = new SyncGameState(this);
+	  Thread syncThread = new Thread(syncGameState);
+	  syncThread.start();
+	  
 	  while (true) {
 		  getRequest();
-		  sendResponse();
+		  // sendResponse();
 		  try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -43,7 +72,7 @@ public class Server extends Thread {
 	  }
   }
   
-  private void sendResponse() {
+  public void sendResponse() {
 	  // Send current game state to all client (TODO send to each specific room)
 	  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
 	  responsePacket.writeData(this);
@@ -85,7 +114,7 @@ public class Server extends Thread {
     	System.out.println("Got an action from client " + address.getHostName() + ":" + port);
     	// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
     	// DUNG actionPacket.getClientName(), getXDirection()....
-    	
+    	game.moveJet(actionPacket.getClientName(), actionPacket.getxDirection(), actionPacket.getyDirection(), actionPacket.isMoving(), actionPacket.isShot());
     	break;
     
     case DISCONNECT:

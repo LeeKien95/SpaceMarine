@@ -45,7 +45,10 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public boolean isClient = false;
     
 	public String currentUsername;
-
+	
+	
+	public boolean isChanged = false;
+	private Packet02ClientAction clientPacket;
 
 	public Game() {
 		super("Test");
@@ -258,6 +261,15 @@ public class Game extends JFrame implements Runnable, Serializable {
 			}
 		}
 	}
+	
+	public Packet02ClientAction getClientPacket() {
+		return clientPacket;
+	}
+
+	public void setClientPacket(Packet02ClientAction clientPacket) {
+		this.clientPacket = clientPacket;
+	}
+
 
 	//control fire arms
 	public void armedJet() {
@@ -272,7 +284,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 			projectiles.add(bullet);
 // 			send to server
 			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
-			
+			setClientPacket(packet);
+			isChanged = true;
 		}
 	}
 
@@ -284,7 +297,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 			}
 //			send data to server
 			Packet02ClientAction packet = new Packet02ClientAction(getCurrentPlayer().getName(), myAnimation);
-			
+			setClientPacket(packet);
+			isChanged = true;
 		}
 	}
 	
@@ -292,7 +306,19 @@ public class Game extends JFrame implements Runnable, Serializable {
 		for(Player p : jetfighters) {
 			if(p.getName().equals(name)) {
 				if(isShot) {
-					
+					Projectile bullet = new Projectile();
+					bullet.xDirection = 0;
+					bullet.yDirection = -1;
+					bullet.x = getCurrentPlayer().getX();
+					bullet.y = getCurrentPlayer().getY();
+					bullet.visible = true;
+					bullet.type = "bullet";
+					projectiles.add(bullet);
+				}
+				if(isMoving) {
+					if(!p.getStatus().equals("dead")) {
+						p.move(xDirection, yDirection);
+					}
 				}
 			}
 		}

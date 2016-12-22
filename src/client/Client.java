@@ -10,12 +10,16 @@ import game.Game;
 import iohelper.packet.Packet;
 import iohelper.packet.Packet00Login;
 import iohelper.packet.Packet01SyncState;
+import iohelper.packet.Packet02ClientAction;
 
 public class Client extends Thread {
   private ClientIO io;
+  private Game game;
   
   public Client () {
 	  this.io = new ClientIO();
+	  this.game = new Game();
+	  
   }
   
   public Client (InetAddress ipAddress, int port) {
@@ -26,7 +30,26 @@ public class Client extends Thread {
 	  return io;
   }
   
+  class ClientListener implements Runnable {
+	  private Client client;
+
+	public ClientListener(Client client) {
+		this.client = client;
+	}
+
+	@Override
+	public void run() {
+		while(true) {
+			if(client.game.isChanged) {
+				Packet02ClientAction actionPacket = client.game.getClientPacket();
+				actionPacket.writeData(client);
+			}	
+		}
+	}
+	  
+  }
   
+
   
   public void run (){
 	  
@@ -35,7 +58,7 @@ public class Client extends Thread {
 	  // Sent login to server
 	  loginPacket.writeData(this);
 	  
-	  Game game = new Game();
+	  
 	  game.isClient = true;
 	  game.isServer = false;
 	  DatagramPacket packet;
@@ -51,13 +74,21 @@ public class Client extends Thread {
 	  game.decomposeState(statePacket.getState());
 	  game.start();
 	  
+	  ClientListener clientListener = new ClientListener(this);
+	  Thread aThread = new Thread(clientListener);
+	  aThread.start();
+	  
 	  // LIEN TUC CAP NHAT STATE GAME TU SERVER
 	  while (true) {
+		  // receive state
 		  packet = io.getPacket();
 		  System.out.println("Receive state ");
 		  statePacket = new Packet01SyncState(packet.getData());
 		  game.decomposeState(statePacket.getState());
+		  
+		  //send packet
 	  }
+
   }
  
 }
