@@ -321,7 +321,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 							projectiles.get(i).visible = false;
 						}
 						if(!projectiles.get(j).type.equals("aestroid")) {
-							projectiles.remove(j).visible = false;
+							projectiles.get(j).visible = false;
 						}
 					}
 				}
