@@ -35,7 +35,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public Animation myAnimation;
 	public JPanel background;
 	public ArrayList<Player> jetfighters;
-	public Player jetfighter;
 	public Client client ;
 	public int kill_mark;
 	public int kill_count = 0;
@@ -44,7 +43,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public int count_frame = 0, respawn= 0, messageTimeOut = 0;
 	public boolean isServer = false;
 	public boolean isClient = false;
-
+    
+	public String currentUsername;
 
 
 	public Game() {
@@ -109,7 +109,16 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 	
 	public Player getCurrentPlayer() {
+		for (Player p : jetfighters) {
+			if (p.getName().equals(currentUsername)) {
+				return p;
+			}
+		}
 		return null;
+	}
+	
+	public void setCurrentPlayerName(String name) {
+		this.currentUsername = name;
 	}
     
 	public ArrayList<Player> getPlayers(){
@@ -602,7 +611,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 
 	public SyncState composeState() {
-		return new SyncState(projectiles, explosions, enemies, jetfighters, jetfighter );
+		return new SyncState(projectiles, explosions, enemies, jetfighters, currentUsername);
 	}
 	
 	public void decomposeState(SyncState state) {
@@ -610,6 +619,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		this.explosions = state.getExplosions();
 		this.enemies = state.getEnemies();
 		this.jetfighters = state.getJetfighters();
-		this.jetfighter = state.getJetfighter();
+		this.currentUsername = state.getCurrentUsername();
 	}
 }

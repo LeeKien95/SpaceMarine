@@ -16,17 +16,19 @@ public class SyncState implements Serializable {
     private ArrayList<Projectile> projectiles, explosions;
 	private ArrayList<Enemy> enemies;
 	private ArrayList<Player> jetfighters;
-	private Player jetfighter;
-    
+    private String currentUsername;
 	
-	public SyncState(ArrayList<Projectile> projectiles, ArrayList<Projectile>explosions, ArrayList<Enemy> enemies, ArrayList<Player> jetfighters, Player jetfighter) {
+	public SyncState(ArrayList<Projectile> projectiles, ArrayList<Projectile>explosions, ArrayList<Enemy> enemies, ArrayList<Player> jetfighters, String currentUsername) {
 		this.projectiles = projectiles;
 		this.explosions = explosions;
 		this.enemies = enemies;
 		this.jetfighters = jetfighters;
-		this.jetfighter = jetfighter;
+		this.currentUsername = currentUsername;
 	}
 	
+	public String getCurrentUsername() {
+		return currentUsername;
+	}
 	
 
 	public ArrayList<Projectile> getProjectiles() {
@@ -45,13 +47,6 @@ public class SyncState implements Serializable {
 		return jetfighters;
 	}
 
-
-
-	public Player getJetfighter() {
-		return jetfighter;
-	}
-	
-	
 	
 	
 }

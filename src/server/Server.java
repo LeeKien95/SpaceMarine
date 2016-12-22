@@ -69,8 +69,9 @@ public class Server extends Thread {
     	System.out.println(address+":"+port+" has connected...");
     	
     	// Them player moi vao game
-		game.jetfighter = new Player(packet.getPlayerName(), address, port);
-		game.jetfighters.add(game.jetfighter);
+		//game.jetfighter = new Player(packet.getPlayerName(), address, port);
+    	game.setCurrentPlayerName(packet.getPlayerName());
+		game.jetfighters.add(game.getCurrentPlayer());
 		
 		// Send response to all client
 		sendResponse();
