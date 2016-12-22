@@ -651,7 +651,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 
 	public SyncState composeState() {
-		return new SyncState(projectiles, explosions, enemies, jetfighters, currentUsername);
+		return new SyncState(new ArrayList(projectiles), new ArrayList(explosions), new ArrayList(enemies), new ArrayList(jetfighters), currentUsername);
 	}
 	
 	public void decomposeState(SyncState state) {
