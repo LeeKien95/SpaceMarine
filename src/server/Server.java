@@ -21,26 +21,29 @@ public class Server extends Thread {
 	}
 	
   public void run() {
+	  // The game for all client
 	  this.game = new Game();
 	  game.isServer = true;
 	  game.isClient = false;
 	  game.start();
-
-//	  game.start();
+	  
+	  // Continuously get request and send response to proper client (TODO implement Room feature)
 	  while (true) {
-		  byte[] data = new byte[10000];
-		  DatagramPacket packet = new DatagramPacket(data, data.length);
-		  packet = io.getPacket();
-		  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
-		  
-//		  if (true) {
-//			  System.out.println("Client < " + packet.getAddress().toString() + ":" + packet.getPort());
-//			  DatagramPacket res = new DatagramPacket("pong".getBytes(), "pong".getBytes().length, packet.getAddress(), packet.getPort());
-//			  io.sendPacket(res);  
-//		  }
+		  getRequest();
+		  sendResponse();
 	  }
   }
   
+  private void sendResponse() {
+	  // Send current game state to all client (TODO send to one specific room)
+	  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
+	  responsePacket.writeData(this);
+  }
+
+  private void getRequest() {
+	  DatagramPacket packet =  io.getPacket();
+	  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+  }
   
   // Xu ly packet truyen toi tuy theo packetType
   private void parsePacket(byte[] data, InetAddress address, int port) {
@@ -57,11 +60,11 @@ public class Server extends Thread {
     	// Them player moi vao game
 		game.jetfighter = new Player(packet.getPlayerName(), address, port);
 		game.jetfighters.add(game.jetfighter);
-		
-		// Gui lai tap du lieu cho client
-		Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
-		responsePacket.writeData(this);
     	break;
+    case SYNC:
+    	
+    	break;
+    
     case DISCONNECT:
     	break;
     }

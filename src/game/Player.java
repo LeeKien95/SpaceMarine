@@ -22,13 +22,9 @@ public class Player implements Serializable {
 		return name;
 	}
 
-
-
 	public void setUsername(String name) {
 		this.name = name;
 	}
-
-
 
 	public String getType() {
 		return type;
