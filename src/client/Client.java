@@ -18,7 +18,7 @@ public class Client extends Thread {
   
   public Client () {
 	  this.io = new ClientIO();
-	  this.game = new Game();
+	  this.game = new Game(true, false);
 	  game.client = this;
 	  game.isClient = true;
 	  game.isServer = false;

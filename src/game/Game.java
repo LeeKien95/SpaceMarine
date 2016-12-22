@@ -63,7 +63,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		this.locked = isLocked;
 	}
 
-	public Game() {
+	public Game(boolean isClient, boolean isServer) {
 		super("Test");
 		setSize(800,600);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,7 +124,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 		addKeyListener(myAnimation);
 		this.setChanged(false);
 		this.clientPacket = new Packet02ClientAction(currentUsername, myAnimation);
-		setVisible(true);
+		if (isClient)
+			setVisible(true);
 	}
 	
 	
