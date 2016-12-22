@@ -45,6 +45,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public boolean isClient = false;
     
 	public String currentUsername;
+	public boolean locked = false;
 	
 	
 	public boolean isChanged = false;
@@ -660,5 +661,13 @@ public class Game extends JFrame implements Runnable, Serializable {
 		this.enemies = state.getEnemies();
 		this.jetfighters = state.getJetfighters();
 		this.currentUsername = state.getCurrentUsername();
+	}
+	
+	public boolean isLocked() {
+		return locked;
+	}
+	
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 }

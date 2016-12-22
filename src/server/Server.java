@@ -24,22 +24,83 @@ public class Server extends Thread {
 	
 	
   class SyncGameState implements Runnable {
+	    private Server server;
+
+		public SyncGameState(Server server) {
+			this.server = server;
+		}
+	
+		@Override
+		public void run() {
+//			while(true) {
+//				try {
+//					server.sendResponse();
+//				} catch (InterruptedException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//				
+//	//			if(server.game.isChanged) {
+//	//				Packet02ClientAction actionPacket = client.game.getClientPacket();
+//	//				actionPacket.writeData(client);
+//	//			}	
+//			}
+			
+			synchronized(server.game) {
+				while (true) {
+				  while (game.isLocked()) {
+					  System.out.println("Wait for it...");
+					  try {
+						server.game.wait();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				  }
+				  
+				  server.sendResponse();
+				  game.notifyAll();
+				}  
+			}
+		}
+	  
+  }
+  
+  class RequestListener implements Runnable {
 	  private Server server;
 
-	public SyncGameState(Server server) {
+	public RequestListener(Server server) {
 		this.server = server;
 	}
 
 	@Override
 	public void run() {
-		while(true) {
-			server.sendResponse();
-			yield();
-//			if(server.game.isChanged) {
-//				Packet02ClientAction actionPacket = client.game.getClientPacket();
-//				actionPacket.writeData(client);
-//			}	
+//		while(true) {
+//			try {
+//				server.getRequest();
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+		
+		synchronized(server.game) {
+			while (true) {
+			  while (game.isLocked()) {
+				  System.out.println("Wait for it...");
+				  try {
+					server.game.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			  }
+			  
+			  server.getRequest();
+			}  
 		}
+		
+		
 	}
 	  
   }
@@ -50,38 +111,72 @@ public class Server extends Thread {
 	  this.game = new Game();
 	  game.isServer = true;
 	  game.isClient = false;
+	  game.setLocked(false);
 	  game.start();
+	  
 	  
 	  // Continuously get request and send response to proper client (TODO implement Room feature)
 	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
 	  // getRequest();
+
+	  
+	  RequestListener RequestListenerThread = new RequestListener(this);
+	  Thread listenerThread = new Thread(RequestListenerThread);
+	  listenerThread.start();
+	  
 	  
 	  SyncGameState syncGameState = new SyncGameState(this);
 	  Thread syncThread = new Thread(syncGameState);
 	  syncThread.start();
+	  // System.out.println(syncThread.getName() + " state: "+syncThread.getState());
 	  
-	  while (true) {
-		  getRequest();
-		  // sendResponse();
-		  try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	  }
+//	  while (true) {
+//		  try {
+//			getRequest();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		  // sendResponse();
+//		  
+////		  try {
+////				Thread.sleep(100);
+////			} catch (InterruptedException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
+//	  }
   }
   
-  public void sendResponse() {
-	  // Send current game state to all client (TODO send to each specific room)
-	  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
-	  responsePacket.writeData(this);
+  public void sendResponse()  {
+//	  synchronized (game) {
+//		  while (game.isLocked()) {
+//			  System.out.println("Wait for it...");
+//			  game.wait();
+//		  }
+		// Send current game state to all client (TODO send to each specific room)
+		  Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
+		  responsePacket.writeData(this);
+//		  game.notifyAll();
+//	  }
   }
   
-  private void getRequest() {
-	  // Get the packets and parse them
-	  DatagramPacket packet =  io.getPacket();
-	  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+  private void getRequest()  {
+//	  synchronized (game) {
+//		  while (game.isLocked()) {
+//			  System.out.println("Wait for it...");
+//			  game.wait();
+//		  }
+	  		game.setLocked(true);
+		  DatagramPacket packet = io.getPacket();
+//		  game.setLocked(true);
+//		  System.out.println("Lock");
+		  parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+		  game.setLocked(false);
+		  game.notifyAll();
+//		  game.setLocked(false);
+//		  System.out.println("Unlock");
+//		  game.notifyAll();
+//	  }
   }
   
   // Xu ly packet truyen toi tuy theo packetType
@@ -103,7 +198,8 @@ public class Server extends Thread {
 		game.jetfighters.add(newPlayer);
 		
 		// Send response to all client
-		sendResponse();
+		Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
+		responsePacket.writeData(this);
     	break;
     case SYNC:
     	
