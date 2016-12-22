@@ -19,11 +19,13 @@ public class Server extends Thread {
 	public Server () {
 		this.io = new ServerIO();
 	}
+	
   public void run() {
 	  this.game = new Game();
+	  game.isServer = true;
+	  game.isClient = false;
 	  game.start();
-//	  game.isServer = true;
-//	  game.isClient = false;
+
 //	  game.start();
 	  while (true) {
 		  byte[] data = new byte[10000];
@@ -35,8 +37,6 @@ public class Server extends Thread {
 //			  System.out.println("Client < " + packet.getAddress().toString() + ":" + packet.getPort());
 //			  DatagramPacket res = new DatagramPacket("pong".getBytes(), "pong".getBytes().length, packet.getAddress(), packet.getPort());
 //			  io.sendPacket(res);  
-//			  
-//			  
 //		  }
 	  }
   }
@@ -67,7 +67,7 @@ public class Server extends Thread {
     }
   }
   
-public Game getGame() {
+  public Game getGame() {
 	  return game;
   }
   

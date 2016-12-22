@@ -1,8 +1,9 @@
 package game;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Enemy {
+public class Enemy implements Serializable{
 	public int step = 5;
 	public int image;
 	public int x, y;

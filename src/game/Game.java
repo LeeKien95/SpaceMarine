@@ -40,7 +40,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public int kill_count = 0;
 	public int level = 1;
 	public String message="";
-	public int count_frame = 0, respawn= 0;
+	public int count_frame = 0, respawn= 0, messageTimeOut = 0;
 	public boolean isServer = false;
 	public boolean isClient = false;
 
@@ -51,7 +51,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 
-		// String name = JOptionPane.showInputDialog(this, "Please enter a username");
+//		String name = JOptionPane.showInputDialog(this, "Please enter a username");
 
 		jetImg = new HashMap<String, Image>();
 		enemyImg = new HashMap<String, Image>();
@@ -63,14 +63,18 @@ public class Game extends JFrame implements Runnable, Serializable {
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
 
-		// jetfighter = new Player();
-		// jetfighter.setName(name==null? name: "Starfighters " + new Random().nextInt(1000) +1);
-		// jetfighters.add(jetfighter);
+//		jetfighter = new Player();
+//		jetfighter.setName(name==null? name: "Starfighters " + new Random().nextInt(1000) +1);
+//		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
 
 		// add multiplayer to jetfighters;
 
-		kill_mark = level*10*jetfighters.size();
+		if(jetfighters.size() > 0) {
+			kill_mark = level*10*jetfighters.size();
+		} else {
+			kill_mark = level * 10;
+		}
 
 		//load images
 		try {
@@ -123,7 +127,9 @@ public class Game extends JFrame implements Runnable, Serializable {
 
 		if(myAnimation.lastKeyPressed!=null) {
 			g.drawString("Kill Count: " + kill_count, 50, 50);
-			g.drawString(this.message, 300, 300);
+			if(messageTimeOut > 0) {
+				g.drawString(this.message, 300, 300);
+			}
 		}
 	}
 
@@ -189,7 +195,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 				}
 				explosions.get(i).rolling();
 				if(explosions.get(i).image == 16) {
-
 					explosions.remove(i);
 				}
 			}
@@ -198,14 +203,14 @@ public class Game extends JFrame implements Runnable, Serializable {
 
 	//spam enemies
 	public void spamEnemies() {
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < (5 + this.level); i++) {
 			enemies.add(new Enemy());
 		}
 	}
 
 	//spam aestroid
 	public void spamAestroids() {
-		for(int i = 0; i < 2; i++) {
+		for(int i = 0; i < 3; i++) {
 			Projectile aestroid = new Projectile();
 			Random rand = new Random();
 			aestroid.x = rand.nextInt(770) + 1;
@@ -223,8 +228,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 	//control enemies firearms
 	public void enemyFire() {
 		Random rand = new Random();
-		if(enemies.size() > 3) {
-			for(int i = 0; i < 3; i++) {
+		if(enemies.size() > this.level) {
+			for(int i = 0; i < this.level; i++) {
 				Projectile bullet = new Projectile();
 				bullet.xDirection = 0;
 				bullet.yDirection = 1;
@@ -254,7 +259,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 
 	//control jetfighter
 	public void moveJet() {
-		if(myAnimation.lastKeyPressed != null) {
+		if(myAnimation.lastKeyPressed != null && myAnimation.isMoving) {
 			if(jetfighters.size() != 0) {
 				jetfighters.get(0).move(myAnimation.getxDirection(), myAnimation.getyDirection());
 			}
@@ -300,17 +305,144 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 
 	public void levelup() {
-		this.message = "Yay! You're level UP! Press enter to suffer more! ;) ";
+		this.message = "Level UP!";
+		this.level++;
+		this.kill_mark = level*10*jetfighters.size();
+		this.kill_count = 0;
+		this.messageTimeOut = 300;
+	}
+	
+	public void serverProcess() {
+		int i = 0;
+		int countAliveJet = 0;
+		
+		
+		//check if game over
+		for(i = 0; i < jetfighters.size(); i++) {
+			if(!jetfighters.get(i).getStatus().equals("dead")) countAliveJet++;
+		}
+		if(jetfighters.size() > 0 && countAliveJet == 0) over();
+
+		//check collision bw 2 projectiles
+		for(i = 0; i < projectiles.size(); i++) {
+			for(int j = 0; j < projectiles.size(); j++) {
+				if(i!=j && collision(projectiles.get(i).x + 20, projectiles.get(i).y + 20, projectiles.get(j).x + 20, projectiles.get(j).y + 20)) {
+					if(!projectiles.get(i).type.equals(projectiles.get(j).type)) {
+						if(!projectiles.get(i).type.equals("aestroid")) {
+							projectiles.get(i).visible = false;
+						}
+						if(!projectiles.get(j).type.equals("aestroid")) {
+							projectiles.get(j).visible = false;
+						}
+					}
+				}
+			}
+		}
+
+		//check player's bullet
+		for(int count = 0; count < jetfighters.size(); count ++) {
+			for(i = 0; i < enemies.size(); i++) {
+				for(int j = 0; j < projectiles.size(); j++) {
+					//detect collision bw enemies and bullet
+					if(projectiles.get(j).type.equals("bullet")) {
+						if(collision(projectiles.get(j).x + 20, projectiles.get(j).y + 20, enemies.get(i).x + 20, enemies.get(i).y + 20)) {
+							enemies.get(i).status = "dead";
+							projectiles.get(j).visible = false;
+							Projectile explosion = new Projectile();
+							explosion.x = enemies.get(i).x;
+							explosion.y = enemies.get(i).y;
+							explosion.image = 0;
+							explosion.type = "enemyExplosion";
+							explosions.add(explosion);
+							kill_count ++;
+						}
+					} else {//detect collision bw player and aestroid
+						if(respawn == 0 && collision(projectiles.get(j).x + 30, projectiles.get(j).y + 30, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
+							Projectile explosion = new Projectile();
+							explosion.x = jetfighters.get(count).getX();
+							explosion.y = jetfighters.get(count).getY();
+							explosion.image = 0;
+							explosion.type = "jetExplosion";
+							explosions.add(explosion);
+							jetfighters.get(count).setStatus("dead");
+						}
+					}
+				}
+
+				//detect collision bw enemies and player
+				if(respawn == 0 && collision(enemies.get(i).x + 20, enemies.get(i).y + 20, jetfighters.get(count).getX() + 20, jetfighters.get(count).getY() + 20)) {
+					enemies.get(i).status = "dead";
+					Projectile explosion = new Projectile();
+					explosion.x = jetfighters.get(count).getX();
+					explosion.y = jetfighters.get(count).getY();
+					explosion.image = 0;
+					explosion.type = "jetExplosion";
+					explosions.add(explosion);
+					jetfighters.get(count).setStatus("dead");
+				}
+			}
+		}
+		
+		
+		if(kill_count >= kill_mark) {
+			levelup();
+		}
+
+		if(respawn > 0) respawn--;
+		if(messageTimeOut > 0) messageTimeOut--;
+		
+//		run() 's work
+//		count_frame++;  
+		
+//		moveJet();
+		moveEnemies();
+		moveProjectiles();
+
+		if(count_frame % 7 == 0) {
+			for(Player p : jetfighters) {
+				p.rolling();
+			}
+		}
+
+//		if(count_frame % 5 == 0) {
+//			armedJet();
+//		}
+
+		if(count_frame % 120 == 0) {
+			spamEnemies();
+		}
+
+		if(count_frame % 200 == 0) {
+			spamAestroids();
+		}
+
+		if(count_frame % 250 == 0) {
+			enemyFire();
+		}
+		
+//		run()'s work
+//		if(count_frame > 1000) count_frame = 1;
+//		System.out.println(count_frame);
+	}
+	
+	
+	public void clientProcess() {
+		moveJet();
+		if(count_frame % 5 == 0) {
+			armedJet();
+		}
+//		System.out.println(count_frame);
 	}
 
 	//check if enemy collision with player or player's bullet collision with enemies.
 	public void startGameplay() {
 		int i = 0;
 		int countAliveJet = 0;
+		
 		for(i = 0; i < jetfighters.size(); i++) {
 			if(!jetfighters.get(i).getStatus().equals("dead")) countAliveJet++;
 		}
-		if(countAliveJet == 0) over();
+		if(jetfighters.size() > 0 && countAliveJet == 0) over();
 
 
 		for(i = 0; i < projectiles.size(); i++) {
@@ -371,16 +503,23 @@ public class Game extends JFrame implements Runnable, Serializable {
 				}
 			}
 		}
+		
+		if(kill_count >= kill_mark) {
+			levelup();
+		}
 
 		if(respawn > 0) respawn--;
+		if(messageTimeOut > 0) messageTimeOut--;
 		count_frame++;
+		
 		moveJet();
 		moveEnemies();
 		moveProjectiles();
 
 		if(count_frame % 7 == 0) {
-			jetfighter.rolling();
-
+			for(Player p : jetfighters) {
+				p.rolling();
+			}
 		}
 
 		if(count_frame % 5 == 0) {
@@ -405,24 +544,35 @@ public class Game extends JFrame implements Runnable, Serializable {
 	//dead
 	public void over() {
 		String message = "I'm the one with the force, the force is with me..";
+		messageTimeOut = 120;
 		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
 		if(option == 0) {
 			for(int i = 0; i < jetfighters.size(); i ++) {
 				jetfighters.get(i).setStatus("alive");
+				myAnimation.isMoving = false;
+				myAnimation.isShot = false;
 			}
 			respawn = 120;
 			level = 1;
 		} else {
 			System.exit(0);
 		}
-
+		
 	}
 
 	@Override
 	public void run() {
 		while(true) {
-			startGameplay();
-			repaint();
+			count_frame ++;
+//			startGameplay();
+			if(isServer) serverProcess();
+			
+			if(isClient) {
+				clientProcess();
+				repaint();
+			}	
+			
+			if(count_frame > 1000) count_frame = 1;
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
@@ -444,8 +594,8 @@ public class Game extends JFrame implements Runnable, Serializable {
 			Server server = new Server();
 			server.start();
 		}
-		Client client = new Client();
-		client.start();
+//		Client client = new Client();
+//		client.start();
 	}
 
 	public SyncState composeState() {

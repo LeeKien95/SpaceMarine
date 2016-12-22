@@ -1,6 +1,8 @@
 package game;
 
-public class Projectile {
+import java.io.Serializable;
+
+public class Projectile implements Serializable{
 	public int x, y;
 	public int xDirection, yDirection;
 	public boolean visible;

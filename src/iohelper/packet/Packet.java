@@ -34,7 +34,6 @@ public abstract class Packet {
 			  return p;
 		  }
 	  }
-	  
 	  return PacketTypes.INVALID;
   }
 }
