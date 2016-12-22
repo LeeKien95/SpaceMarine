@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.swing.JOptionPane;
 
 import game.Game;
+import iohelper.packet.Packet;
 import iohelper.packet.Packet00Login;
 import iohelper.packet.Packet01SyncState;
 
@@ -24,6 +25,8 @@ public class Client extends Thread {
   public ClientIO getIO() {
 	  return io;
   }
+  
+  
   
   public void run (){
 	  

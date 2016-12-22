@@ -30,7 +30,7 @@ public class Server extends Thread {
 	  
 	  // Continuously get request and send response to proper client (TODO implement Room feature)
 	  // LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
-	  
+	  // getRequest();
 	  while (true) {
 		  getRequest();
 		  sendResponse();
@@ -69,8 +69,9 @@ public class Server extends Thread {
     	System.out.println(address+":"+port+" has connected...");
     	
     	// Them player moi vao game
-		game.jetfighter = new Player(packet.getPlayerName(), address, port);
-		game.jetfighters.add(game.jetfighter);
+		Player newPlayer = new Player(packet.getPlayerName(), address, port);
+    	game.setCurrentPlayerName(packet.getPlayerName());
+		game.jetfighters.add(newPlayer);
 		
 		// Send response to all client
 		sendResponse();
