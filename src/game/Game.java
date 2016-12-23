@@ -69,7 +69,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setResizable(false);
 
-//		String name = JOptionPane.showInputDialog(this, "Please enter a username");
 
 		jetImg = new HashMap<String, Image>();
 		enemyImg = new HashMap<String, Image>();
@@ -81,9 +80,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		explosions = new ArrayList<Projectile>();
 		jetfighters = new ArrayList<Player>();
 
-//		jetfighter = new Player();
-//		jetfighter.setName(name==null? name: "Starfighters " + new Random().nextInt(1000) +1);
-//		jetfighters.add(jetfighter);
 		myAnimation = new Animation();
 		
 
@@ -118,7 +114,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 			enemyBullet = ImageIO.read(new File("images/Red/bullet_red.png"));
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		addKeyListener(myAnimation);
@@ -194,14 +189,10 @@ public class Game extends JFrame implements Runnable, Serializable {
 				}
 			}
 		}
-//		if(!jetfighter.getStatus().equals("dead")) {
-//			g.drawImage(jetImg.get("idle_"+ jetfighter.getImage()), jetfighter.getX(), jetfighter.getY(), 40,40, this);
-//		}
 	}
 
 	//paint bullets, aestroid.
 	private void paintProjectiles(Graphics g) {
-		// TODO Auto-generated method stub
 		if(projectiles.size() != 0) {
 			for(int i = 0; i < projectiles.size(); i++) {
 				if(projectiles.get(i).type.equals("bullet")) {
@@ -309,7 +300,7 @@ public class Game extends JFrame implements Runnable, Serializable {
 		}
 	}
 
-	//control jetfighter
+	//control jetfighter at Client
 	public void moveJet() {
 		if(myAnimation.lastKeyPressed != null && myAnimation.isMoving) {
 			if(jetfighters.size() != 0) {
@@ -325,10 +316,10 @@ public class Game extends JFrame implements Runnable, Serializable {
 	}
 	
 	public void sendData(Client client) {
-//		System.out.println("packet about to send: isShot: " + getClientPacket().isShot());
 		getClientPacket().writeData(client);
 	}
 	
+	// control jetfighter at Server
 	public void moveJet(String name, int xDirection, int yDirection, boolean isMoving, boolean isShot) {
 		for(Player p : jetfighters) {
 			if(p.getName().equals(name)) {
@@ -476,8 +467,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		if(respawn > 0) respawn--;
 		if(messageTimeOut > 0) messageTimeOut--;
 		
-//		run() 's work
-//		count_frame++;  
 		
 //		moveJet();
 		moveEnemies();
@@ -498,10 +487,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		if(count_frame % 250 == 0) {
 			enemyFire();
 		}
-		
-//		run()'s work
-//		if(count_frame > 1000) count_frame = 1;
-//		System.out.println(count_frame);
 	}
 	
 	
@@ -510,7 +495,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 		if(count_frame % 10 == 0) {
 			armedJet();
 		}
-//		System.out.println(count_frame);
 	}
 
 	//check if enemy collision with player or player's bullet collision with enemies.
@@ -643,7 +627,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public void run() {
 		while(true) {
 			count_frame ++;
-//			startGameplay();
 			if(isServer) serverProcess();
 			
 			if(isClient) {
@@ -655,7 +638,6 @@ public class Game extends JFrame implements Runnable, Serializable {
 			try {
 				Thread.sleep(17);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -665,22 +647,14 @@ public class Game extends JFrame implements Runnable, Serializable {
 	public void start() {
 		new Thread(this).start();
 	}
-
-	public static void main(String[] args) {
-		String message = "Do you want to run the server?";
-		int option = JOptionPane.showConfirmDialog(null, message, message, JOptionPane.YES_NO_OPTION);
-		if(option == 0) {
-			Server server = new Server();
-//			server.start();
-		}
-//		Client client = new Client();
-//		client.start();
-	}
-
+    
+	
+	// GOI NHUNG THUOC TINH CAN THIET VAO MOT STATE
 	public SyncState composeState() {
 		return new SyncState(new ArrayList(projectiles), new ArrayList(explosions), new ArrayList(enemies), new ArrayList(jetfighters));
 	}
 	
+	// OP' STATE NHAN DUOC VAO GAME
 	public void decomposeState(SyncState state) {
 		this.projectiles = state.getProjectiles();
 		this.explosions = state.getExplosions();

@@ -11,6 +11,7 @@ import client.Client;
 import server.Server;
 
 public abstract class Packet {
+	// ALL TYPES OF PACKET
   public static enum PacketTypes {
 	  INVALID(-1), LOGIN(00), SYNC(01), ACTION(02), DISCONNECT(10);
 	  
@@ -44,6 +45,7 @@ public abstract class Packet {
 	  return PacketTypes.INVALID;
   }
   
+  // Serialize
   public static byte[] serialize(Object object) {
 	    ByteArrayOutputStream bStream = new ByteArrayOutputStream();
 		ObjectOutput oo = null;
@@ -63,6 +65,7 @@ public abstract class Packet {
 		return serializedMessage;
   }
   
+  // Deserialize
   public static Object deserialize(byte[] data) {
 	  Object result = null;
 	  try {

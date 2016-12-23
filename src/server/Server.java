@@ -28,122 +28,79 @@ public class Server extends Thread {
 		game.isClient = false;
 		game.start();
 	}
-	
-	
-
-	
-
-	
     
 	public Object getFlag() {
 		return flag;
 	}
 
-
-
-
-
-
-
 	public void setFlag(Object flag) {
 		this.flag = flag;
 	}
 
-
-
-
-
-
-
 	@Override
 	public void run() {
-		// The game for all client
-		
-
-		// Continuously get request and send response to proper client (TODO
-		// implement Room feature)
-		// LIEN TUC GUI RESPONSE LA GAME STATE CHO TAT CA CLIENT
-		// getRequest();
-
+		// LIEN TUC NHAN PACKET TU CLIENT
 		ClientListen listen = new ClientListen(this);
 		Thread listenThread = new Thread(listen);
 		listenThread.start();
-
+        
+		// LIEN TUC GUI STATE CHO CLIENTS
 		SyncGameState syncGameState = new SyncGameState(this);
 		Thread syncThread = new Thread(syncGameState);
 		syncThread.start();
-		
-		// while (true) {
-		// getRequest();
-		// // sendResponse();
-		// try {
-		// Thread.sleep(100);
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		// }
 	}
 
-//	public void sendResponse() {
-//		// Send current game state to all client (TODO send to each specific
-//		// room)
-////		Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
-////		responsePacket.writeData(this);
-//		System.out.println("sending...");
-//		
-//
-//		 synchronized(game) {
-//			
-//			 System.out.println("In sync");
-//			 while (game.isLocked()) {
-//				 System.out.println("Wait for it...");
-//				 try {
-//					game.wait();
-//				 } catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				 }
-//			 }
-//			
-////			 Packet01SyncState responsePacket = new
-////			 Packet01SyncState(game.composeState());
-////			 responsePacket.writeData(this);
-////				System.out.println("state of send" + this.getState());
-//
-//			 
-//			 Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
-//			 responsePacket.writeData(this);
-//			 
-//		 }
-//		 
-//		 System.out.println(Thread.currentThread().getState());
-//	}
-//
-//	private void getRequest() throws InterruptedException {
-//		// Get the packets and parse them
-//		synchronized (game) {
-//			 System.out.println("In sync");
-//
-//			while (game.isLocked()) {
-//				System.out.println("Wait for it...");
-//				game.wait();
-//			}
-//			
-//			System.out.println("In sync");
-//
-//			DatagramPacket packet = io.getPacket();
-//			// System.out.println("got a request");
-//
-//			game.setLocked(true);
-//			parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
-//			game.setLocked(false);
-//			
-//			System.out.println("Still run getRequest");
-//		}
-//	}
+	public Game getGame() {
+		return this.game;
+	}
 
-	// Xu ly packet truyen toi tuy theo packetType
+	public ServerIO getIO() {
+		return io;
+	}
+
+	public void sendDataToProperClient(byte[] data) {
+		for (Player p : game.getPlayers()) {
+			io.sendData(data, p.getIpAddress(), p.getPort());
+		}
+	}
+}
+
+class ClientListen implements Runnable {
+	private Server server;
+
+	public ClientListen(Server server) {
+		this.server = server;
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			// WAIT FOR A PACKET FROM CLIENT
+			DatagramPacket packet = server.getIO().getPacket();
+			
+			// THEN SYNCHRONIZE THE GAME
+			synchronized (this.server.getGame()) {
+				while (this.server.getGame().isLocked()) {
+					System.out.println("Wait for it...");
+					try {
+						this.server.getGame().wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				this.server.getGame().notifyAll();
+				parsePacket(packet.getData(), packet.getAddress(), packet.getPort());
+				this.server.getGame().notifyAll();
+			}
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void parsePacket(byte[] data, InetAddress address, int port) {
 		String message = new String(data).trim();
 		PacketTypes type = Packet.lookupPacket(Integer.parseInt(message.substring(0, 2)));
@@ -158,23 +115,16 @@ public class Server extends Thread {
 
 			// Them player moi vao game
 			Player newPlayer = new Player(packet.getPlayerName(), address, port);
-			game.jetfighters.add(newPlayer);
-
-//			// Send response to all client
-//			Packet01SyncState responsePacket = new Packet01SyncState(game.composeState());
-//			responsePacket.writeData(this);
+			server.getGame().setCurrentPlayerName(packet.getPlayerName());
+			server.getGame().jetfighters.add(newPlayer);
 		case SYNC:
 
 			break;
 
 		case ACTION:
+			// DEAL WITH AN ACTION FROM CLIENT
 			Packet02ClientAction actionPacket = new Packet02ClientAction(data);
-			// System.out.println("Got an action from client " +
-			// address.getHostName() + ":" + port);
-			// SERVER SE XU LY ACTION O DAY (CAP NHAT STATE)
-			// DUNG actionPacket.getClientName(), getXDirection()....
-//			System.out.println("received " + actionPacket.isShot());
-			game.moveJet(actionPacket.getClientName(), actionPacket.getxDirection(), actionPacket.getyDirection(),
+			server.getGame().moveJet(actionPacket.getClientName(), actionPacket.getxDirection(), actionPacket.getyDirection(),
 					actionPacket.isMoving(), actionPacket.isShot());
 			break;
 
@@ -182,19 +132,42 @@ public class Server extends Thread {
 			break;
 		}
 	}
+}
 
-	public Game getGame() {
-		return this.game;
+class SyncGameState implements Runnable {
+	private Server server;
+
+	public SyncGameState(Server server) {
+		this.server = server;
 	}
 
-	public ServerIO getIO() {
-		return io;
-	}
-
-	public void sendDataToProperClient(byte[] data) {
-		for (Player p : game.getPlayers()) {
-			// System.out.println("Sent to" + p.getPort());
-			io.sendData(data, p.getIpAddress(), p.getPort());
+	@Override
+	public void run() {
+		while (true) {
+			synchronized(this.server.getGame()) {
+				
+				 while (this.server.getGame().isLocked()) {
+					 System.out.println("Wait for it...");
+					 try {
+						this.server.getGame().wait();
+					 } catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					 }
+				 }
+				 
+				 // SEND STATE TO ALL CLIENTS
+				 Packet01SyncState responsePacket = new Packet01SyncState(this.server.getGame().composeState());
+				 responsePacket.writeData(this.server);
+				 
+				 this.server.getGame().notifyAll();
+			 }
+			
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

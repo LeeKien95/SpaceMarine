@@ -11,6 +11,5 @@ public class ServerMain {
 	      System.out.println("Server is running...");
 		  Server server = new Server();
 		  server.start();
-		  
   }
 }
